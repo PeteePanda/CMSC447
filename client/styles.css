@@ -35,6 +35,7 @@ html, body {
 	width: 33.33%;
 }
 
+/* Contained in sidebar */
 table {
     border-collapse: collapse;
     background-color: #202225;
@@ -45,6 +46,11 @@ table {
   
 th{
     color:#fff;
+	border-bottom: 2px solid #ccc;
+}
+
+td{
+	border-bottom: 1px solid #2F3136;
 }
 
 td, th {
@@ -53,6 +59,7 @@ td, th {
     color: white;
 }
 
+/* Contained in main-content */
 .lyrics{
 	flex-grow: 1;
 	padding: 20px;
@@ -62,3 +69,40 @@ td, th {
 	margin: 0 auto; /* centers div horizontally within parent */
     color: white;
 }
+
+.input{
+	height: 50px;
+	width: 100%;
+	/* background-color: red; */
+}
+.search-box {
+	position: relative;
+	margin: 0 auto;
+	justify-content: center;
+	align-items: center;
+	display: flex;
+  }
+  
+.search-box input[type="text"] {
+	width: 50%;
+	padding: 12px 20px;
+	border-radius: 10px;
+	border: none;
+	background-color: #f2f2f2;
+}
+  
+.search-box button[type="submit"] {
+	background-color: #f2f2f2;
+	padding: 10px 10px;
+	border-radius: 10px;
+}
+  
+.search-box button[type="submit"]:hover {
+	cursor: pointer;
+}
+  
+.fa-search {
+	font-size: 20px;
+	color: #555;
+}
+  

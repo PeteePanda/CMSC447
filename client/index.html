@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>Lyridactle - Guess the Song!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
@@ -58,6 +59,14 @@
                 </p>
             </div>
 			<div class="sidebar">
+                <div class="input">
+                    <form>
+                        <div class="search-box">
+                            <input type="text" id="guess-input" placeholder="Guess a Word!">
+                            <button type="submit" id="guess-btn"><i class="fa fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -67,25 +76,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Apple</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Banana</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Cherry</td>
-                            <td>1</td>
-                        </tr>
                     </tbody>
                 </table>
             </div>
 		</div>
 	</div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
