@@ -27,7 +27,7 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
         if lyric in words_not_allowed:
             obfuscation_indexes.append(counter)
             counter += 1
-            obfuscated_lyrics.append('_')
+            obfuscated_lyrics.append("_")
         else:
             obfuscated_lyrics.append(lyric)
             counter += 1
