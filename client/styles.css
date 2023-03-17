@@ -1,0 +1,64 @@
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.wrapper {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.title {
+	background-color: #2F3136;
+	color: #fff;
+	font-size: 24px;
+	padding: 20px;
+	text-align: center;
+}
+
+.content {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+}
+
+.main-content {
+	background-color: #202225;
+	flex-grow: 1;
+	padding: 20px;
+}
+
+.sidebar {
+	background-color: #2F3136;
+	width: 33.33%;
+}
+
+table {
+    border-collapse: collapse;
+    background-color: #202225;
+    flex-grow: 1;
+	margin: 0 auto; /* centers div horizontally within parent */
+    width: 100%;
+}
+  
+th{
+    color:#fff;
+}
+
+td, th {
+    padding: 15px;
+    text-align: center;
+    color: white;
+}
+
+.lyrics{
+	flex-grow: 1;
+	padding: 20px;
+	text-align: center; /* centers text */
+	max-width: 300px; /* limits width of text */
+	word-wrap: break-word; /* allows words to wrap to next line */
+	margin: 0 auto; /* centers div horizontally within parent */
+    color: white;
+}
