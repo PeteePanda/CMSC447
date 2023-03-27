@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from helperFxns import *
 
 app = Flask(__name__)
-database = Lyridactle_DB("data.db")
+database = Lyridact_DB("data.db")
 
 
 @app.route('/api/db/reset')

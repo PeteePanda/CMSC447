@@ -22,7 +22,7 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(abs(percentage - actualObfuscation) < .05)
 
     def test_database_reset(self):
-        db = Lyridactle_DB("test_data.db")
+        db = Lyridact_DB("test_data.db")
         check = db.reset()
         
         conn = sqlite3.connect(db.DBpath).cursor()
