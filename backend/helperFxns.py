@@ -1,17 +1,14 @@
 import random
 import sqlite3
 
-
-
-
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 
 ##### Takes input song lyrics, artist name, and song name as strings as
 ##### well as a number 0 - 1 indicating the percentage of words to be
 ##### obfuscated. 
 
-##### Returns: Dictionary with songName, songArtist, songLyrics,
-##### and the resulting obfuscatedLyrics. 
+##### Returns: Dictionary with songName, songArtist, songLyrics, 
+##### percentage obfuscated, and the resulting obfuscatedLyrics. 
 
 ##### obfuscatedLyrics is an array of lyrics,
 ##### obfuscated ones replaced with an underscore '_'
@@ -21,12 +18,11 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
     lyric_array = songLyrics.lower().split()
     name_array = songName.lower().split()
     artist_array = songArtist.lower().split()
-
     words_not_allowed = name_array + artist_array
     song_length = len(lyric_array)
-
     obfuscation_indexes = []
     counter = 0
+
     for lyric in lyric_array:
         if lyric in words_not_allowed:
             obfuscation_indexes.append(counter)
@@ -42,12 +38,8 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
 
     for x in range(round(remove)):
         plain_lyrics = list(plain_text_lyrics)
-        random_index = random.choice(plain_lyrics)
-
-        
+        random_index = random.choice(plain_lyrics)     
         size = len(lyric_array[random_index])
-        
-
         obfuscated_lyrics[random_index] = ("_"*size)
         plain_text_lyrics.remove(random_index)
 
@@ -60,7 +52,7 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
     }
 
 
-class Lyridactle_DB:
+class Lyridact_DB:
     def __init__(self, PATH_TO_DB):
         self.DBpath = PATH_TO_DB
 
