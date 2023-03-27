@@ -2,6 +2,8 @@ import random
 import sqlite3
 
 
+
+
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 
 ##### Takes input song lyrics, artist name, and song name as strings as
@@ -29,7 +31,8 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
         if lyric in words_not_allowed:
             obfuscation_indexes.append(counter)
             counter += 1
-            obfuscated_lyrics.append("_")
+            size = len(lyric)
+            obfuscated_lyrics.append(("_"*size))
         else:
             obfuscated_lyrics.append(lyric)
             counter += 1
@@ -38,28 +41,40 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
     remove = (percentage * song_length) - len(obfuscation_indexes)
 
     for x in range(round(remove)):
-        random_index = random.choice(list(plain_text_lyrics))
-        obfuscated_lyrics[random_index] = "_"
+        plain_lyrics = list(plain_text_lyrics)
+        random_index = random.choice(plain_lyrics)
+
+        
+        size = len(lyric_array[random_index])
+        
+
+        obfuscated_lyrics[random_index] = ("_"*size)
         plain_text_lyrics.remove(random_index)
 
     return {
         "songName": songName,
         "songArtist": songArtist,
         "songLyrics": songLyrics,
-        "obfuscatedLyrics": obfuscated_lyrics
+        "obfuscatedLyrics": obfuscated_lyrics,
+        "percentage": percentage
     }
 
 
 class Lyridactle_DB:
+    def __init__(self, PATH_TO_DB):
+        self.DBpath = PATH_TO_DB
+
+
+
     def connect(self):
         try:
-            return sqlite3.connect("data.db")
+            return sqlite3.connect(self.DBpath)
         except:
             print("Something went wrong connecting to DB.")
 
     def reset(self):
         try:
-            delete_file = open("data.db", "w")
+            delete_file = open(self.DBpath, "w")
             delete_file.close()
             db = self.connect()
             create_song_table = """CREATE TABLE songs (
