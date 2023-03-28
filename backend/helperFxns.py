@@ -51,12 +51,55 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
         "percentage": percentage
     }
 
+class SavePoint:
+    def __init__(self, wordsUsed, id, currentLevel):
+        self.wordsUsed = wordsUsed
+        self.songID = id
+        self.currentLevel = currentLevel
+    
+    def json(self):
+        return ({
+            "wordsUsed": self.wordsUsed,
+            "songID": self.songID,
+            "currentLevel": self.currentLevel
+        })
+
+class User:
+    def __init__(self, cookie, name, lvlsUnlocked, save):
+        self.id = cookie
+        self.name = name
+        self.unlocked = lvlsUnlocked
+        self.savePoint = save
+    def json(self):
+        return ({
+            "id": self.id,
+            "name": self.name,
+            "levelsUnlocked": self.unlocked,
+            "savePoint": self.savePoint
+        })
+
+        
+class Song:
+    def __init__(self, songID, artist, lyrics, name, obfPattern):
+        self.id = songID
+        self.artist = artist
+        self.lyrics = lyrics
+        self.name = name
+        self.obfPattern = obfPattern
+
+    def json(self):
+        return ({
+            "id": self.id,
+            "artist": self.artist,
+            "name": self.name,
+            "lyrics": self.lyrics,
+            "obfPattern": self.obfPattern
+        })
+
 
 class Lyridact_DB:
     def __init__(self, PATH_TO_DB):
         self.DBpath = PATH_TO_DB
-
-
 
     def connect(self):
         try:
@@ -77,7 +120,8 @@ class Lyridact_DB:
                 obfPattern VARCHAR(255) NOT NULL
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
-                topFive VARCHAR(255)
+                user VARCHAR(255),
+                points INT NOT NULL
             );"""
             create_user_table = """CREATE TABLE users (
                 cookie VARCHAR(255) NOT NULL,
