@@ -60,7 +60,22 @@ td, th {
 }
 
 /* Contained in main-content */
-.lyrics{
+
+.song-info{
+    color: white;
+    text-align: center;
+}
+
+#name{
+    font-size: 20pt;
+    margin: 0;
+}
+#artist{
+    margin-top: 5pt;
+    font-style:italic;
+}
+
+#lyrics{
 	flex-grow: 1;
 	padding: 20px;
 	text-align: center; /* centers text */

@@ -27,8 +27,11 @@ addGuessBtn.addEventListener('click', function() {
                 // Add code to fill in the brokeSong array and reload it on page
                 brokeSong[i] = finishedSong[i];
             }
-            console.log(brokeSong); //testing
         }
+        // Update page
+        updatePage();
+        console.log(brokeSong); //testing
+
         // Create a new row
         const newRow = document.createElement('tr');
     
@@ -69,6 +72,42 @@ addGuessBtn.addEventListener('click', function() {
 let songName = "Roar";
 let songArtist = "Katy Perry";
 let percentDif = "20%";
-let finishedSong = ["You're","gonna","hear","me","roar"];
-let brokeSong = ["_____","_____","hear","__","roar"];
+let finishedSong = ['i', 'used', 'to', 'bite', 'my', 'tongue', 'and', 'hold', 'my', 'breath', 'scared', 'to', 'rock', 'the', 'boat', 'and', 'make', 'a', 'mess', 'so', 'i', 'sat', 'quietly', 'agreed', 'politely', 'i', 'guess', 'that', 'i', 'forgot', 'i', 'had', 'a', 'choice', 'i', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'i', 'stood', 'for', 'nothing', 'so', 'i', 'fell', 'for', 'everything', '~', 'you', 'held', 'me', 'down,', 'but', 'i', 'got', 'up', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', 'you', 'hear'];
+let brokeSong = ['_', 'used', 'to', 'bite', 'my', '______', 'and', 'hold', 'my', '______', 'scared', 'to', 'rock', 'the', '___', 'and', 'make', 'a', 'mess', 'so', 'i', 'sat', '_______', 'agreed', 'politely', 'i', 'guess', 'that', 'i', 'forgot', 'i', 'had', 'a', 'choice', 'i', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'i', 'stood', 'for', 'nothing', 'so', 'i', 'fell', 'for', 'everything', '~', 'you', 'held', 'me', 'down,', 'but', 'i', 'got', 'up', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', 'you', 'hear'];
+updatePage();
 
+// Update the page whenever a song is loaded in, or the broke song array is modified
+function updatePage() {
+    let title = document.getElementById('name');
+    let artist = document.getElementById('artist');
+    let lyrics = document.getElementById('lyrics');
+    console.log('hi');
+    // Clear out the page
+    title.innerHTML = "";
+    artist.innerHTML = "";
+    lyrics.innerHTML = "";
+
+    title.innerHTML += "'";
+    title.innerHTML += songName;
+    title.innerHTML += "'";
+
+    artist.innerHTML += songArtist;
+
+    for(i in brokeSong){
+        // Add Line Breaks when necessary to separate parts of the song
+        if(brokeSong[i] == "~"){
+            lyrics.innerHTML += "<br><br>";
+        }
+        else{
+            if((brokeSong[i])[0] == "_"){
+                for(char in brokeSong[i]){
+                    lyrics.innerHTML += String.fromCharCode(9619);
+                }
+            }
+            else{
+                lyrics.innerHTML += brokeSong[i]; // Add word by word or blank if its blank
+            }
+            lyrics.innerHTML += " ";
+        }
+    }
+}
