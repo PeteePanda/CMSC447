@@ -1,15 +1,16 @@
 import random
 import sqlite3
+import re
 
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
-
+#####
 ##### Takes input song lyrics, artist name, and song name as strings as
 ##### well as a number 0 - 1 indicating the percentage of words to be
 ##### obfuscated. 
-
-##### Returns: Dictionary with songName, songArtist, songLyrics, 
-##### percentage obfuscated, and the resulting obfuscatedLyrics. 
-
+#####
+##### Returns: Dictionary with songName, songArtist, songLyrics,
+##### percentage obfuscated, and the resulting obfuscatedLyrics.
+#####
 ##### obfuscatedLyrics is an array of lyrics,
 ##### obfuscated ones replaced with an underscore '_'
 
@@ -21,10 +22,15 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
     words_not_allowed = name_array + artist_array
     song_length = len(lyric_array)
     obfuscation_indexes = []
+
     counter = 0
 
     for lyric in lyric_array:
-        if lyric in words_not_allowed:
+        if (re.search("\[[\w]*\]", lyric) != None):
+            obfuscation_indexes.append(counter)
+            counter += 1
+            obfuscated_lyrics.append(lyric)
+        elif lyric in words_not_allowed:
             obfuscation_indexes.append(counter)
             counter += 1
             size = len(lyric)
