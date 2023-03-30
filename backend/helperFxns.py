@@ -1,4 +1,3 @@
-from email import header
 import json
 import random
 import sqlite3
@@ -12,125 +11,6 @@ import lyricsgenius
 
 load_dotenv()
 
-class SavePoint:
-    def __init__(self, wordsUsed, id, currentLevel):
-        self.wordsUsed = wordsUsed
-        self.songID = id
-        self.currentLevel = currentLevel
-    
-    def json(self):
-        return ({
-            "wordsUsed": self.wordsUsed,
-            "songID": self.songID,
-            "currentLevel": self.currentLevel
-        })
-
-class User:
-    def __init__(self, cookie, name, lvlsUnlocked, save):
-        self.id = cookie
-        self.name = name
-        self.unlocked = lvlsUnlocked
-        self.savePoint = save
-    def json(self):
-        return ({
-            "id": self.id,
-            "name": self.name,
-            "levelsUnlocked": self.unlocked,
-            "savePoint": self.savePoint
-        })
-
-        
-class Song:
-    def __init__(self, songID, artist, lyrics, name, obfEasy, obfMedium, obfHard):
-        self.id = songID
-        self.artist = artist
-        self.lyrics = lyrics
-        self.name = name
-        self.obfPatterns = {"easy": obfEasy, "medium": obfMedium, "hard": obfHard}
-
-    def json(self):
-        return ({
-            "id": self.id,
-            "artist": self.artist,
-            "name": self.name,
-            "lyrics": self.lyrics,
-            "obfPatterns": self.obfPatterns
-        })
-
-
-class Lyridact_DB:
-    def __init__(self, PATH_TO_DB):
-        self.DBpath = PATH_TO_DB
-
-    def connect(self):
-        try:
-            return sqlite3.connect(self.DBpath)
-        except:
-            print("Something went wrong connecting to DB.")
-
-    def reset(self):
-        try:
-            delete_file = open(self.DBpath, "w")
-            delete_file.close()
-            db = self.connect()
-            create_song_table = """CREATE TABLE songs (
-                songID INT NOT NULL,
-                artist VARCHAR(255) NOT NULL,
-                lyrics VARCHAR(255) NOT NULL,
-                songName VARCHAR(255) NOT NULL,
-                obfPattern VARCHAR(255) NOT NULL
-            );"""
-            create_leaderboard_table = """CREATE TABLE leaderboard (
-                user VARCHAR(255),
-                points INT NOT NULL
-            );"""
-            create_user_table = """CREATE TABLE users (
-                cookie VARCHAR(255) NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                levelsUnlocked INT NOT NULL,
-                savePoint VARCHAR(255) NOT NULL
-            );"""
-
-            db.execute(create_song_table)
-            db.execute(create_leaderboard_table)
-            db.execute(create_user_table)
-            db.commit()
-            print("Table reset.")
-            return True
-        except:
-            print("Something went wrong with table reset.")
-            return False
-        
-        finally:
-            db.close()
-    
-    def addUser(self):
-        return None
-
-    def updateUser(self):
-        return None
-    
-    def getUser(self):
-        return None
-    
-    def getLeaderboard(self):
-        return None
-    
-    def addSong(self):
-        return None
-    
-    def updateSong(self):
-        return None
-    
-    def getSong(self):
-        return None
-    
-    def deleteUser(self):
-        return None
-        
-    def getPoints(self):
-        return None
-
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 #####
 ##### Takes input song lyrics, artist name, and song name as strings as
@@ -143,11 +23,16 @@ class Lyridact_DB:
 ##### obfuscatedLyrics is an array of lyrics,
 ##### obfuscated ones replaced with an underscore '_'
 
-def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
+def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
     obfuscated_lyrics = []
     lyric_array = songLyrics.lower().split()
     name_array = songName.lower().split()
-    artist_array = songArtist.lower().split()
+    artist_array = []
+    for artist in songArtists:
+        artist = artist.lower().split()
+        artist_array += artist
+
+    
     words_not_allowed = name_array + artist_array
     song_length = len(lyric_array)
     obfuscation_indexes = []
@@ -155,7 +40,7 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
     counter = 0
 
     for lyric in lyric_array:
-        if (re.search("\[[\w]*\]", lyric) != None):
+        if (re.search(r"\[[\w]*\]", lyric) != None):
             obfuscation_indexes.append(counter)
             counter += 1
             obfuscated_lyrics.append("~")
@@ -180,13 +65,11 @@ def obfuscateLyrics(songLyrics, songName, songArtist, percentage):
 
     return obfuscated_lyrics
 
-
-
-def create_song(songLyrics, songName, songArtist, songID):
-    easy = obfuscateLyrics(songLyrics, songName, songArtist, .2)
-    medium = obfuscateLyrics(songLyrics, songName, songArtist, .5)
-    hard = obfuscateLyrics(songLyrics, songName, songArtist, .7)
-    return(Song(songID, songArtist, songLyrics, songName, easy, medium, hard))
+def create_song(songLyrics, songName, songArtists, songID):
+    easy = obfuscateLyrics(songLyrics, songName, songArtists, .2)
+    medium = obfuscateLyrics(songLyrics, songName, songArtists, .5)
+    hard = obfuscateLyrics(songLyrics, songName, songArtists, .7)
+    return(Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
 
 def getSpotifyAccessToken():
     url = "https://accounts.spotify.com/api/token"
@@ -233,7 +116,6 @@ def getTop50():
     else:
         return None
 
-
 def getLyrics(songName, songArtists):
     regex = r'[^a-zA-Z0-9\s]'
     name = re.sub(regex, '', songName.lower())
@@ -252,8 +134,157 @@ def getLyrics(songName, songArtists):
     lyrics = genius.lyrics(int(song_id))
     start = lyrics.find('[')
     clean_lyrics = lyrics[start:-7]
+    return clean_lyrics, int(song_id)
+
+class SavePoint:
+    def __init__(self, wordsUsed, id, currentLevel):
+        self.wordsUsed = wordsUsed
+        self.songID = id
+        self.currentLevel = currentLevel
+    
+    def json(self):
+        return ({
+            "wordsUsed": self.wordsUsed,
+            "songID": self.songID,
+            "currentLevel": self.currentLevel
+        })
+
+class User:
+    def __init__(self, cookie, name, lvlsUnlocked, save):
+        self.id = cookie
+        self.name = name
+        self.unlocked = lvlsUnlocked
+        self.savePoint = save
+    def json(self):
+        return ({
+            "id": self.id,
+            "name": self.name,
+            "levelsUnlocked": self.unlocked,
+            "savePoint": self.savePoint
+        })
+
+        
+class Song:
+    def __init__(self, songID, artists, lyrics, name, obfEasy, obfMedium, obfHard):
+        self.id = songID
+        self.artists = artists
+        self.lyrics = lyrics
+        self.name = name
+        self.obfPatterns = json.dumps({"easy": obfEasy, "medium": obfMedium, "hard": obfHard})
+
+    def json(self):
+        return ({
+            "id": self.id,
+            "artists": self.artists,
+            "name": self.name,
+            "lyrics": self.lyrics,
+            "obfPatterns": self.obfPatterns
+        })
+    
+    def tuple(self):
+        return ((self.id, self.artists, self.lyrics, self.name, self.obfPatterns))
 
 
-    return clean_lyrics
+class Lyridact_DB:
+    def __init__(self, PATH_TO_DB):
+        self.DBpath = PATH_TO_DB
+
+    def connect(self):
+        try:
+            return sqlite3.connect(self.DBpath)
+        except:
+            print("Something went wrong connecting to DB.")
+
+    def reset(self):
+        try:
+            delete_file = open(self.DBpath, "w")
+            delete_file.close()
+            db = self.connect()
+            create_song_table = """CREATE TABLE songs (
+                id INTEGER,
+                artists TEXT,
+                lyrics TEXT,
+                name TEXT,
+                obfPatterns TEXT
+            );"""
+            create_leaderboard_table = """CREATE TABLE leaderboard (
+                user VARCHAR(255),
+                points INT NOT NULL
+            );"""
+            create_user_table = """CREATE TABLE users (
+                cookie VARCHAR(255) NOT NULL,
+                name VARCHAR(255) NOT NULL,
+                levelsUnlocked INT NOT NULL,
+                savePoint VARCHAR(255) NOT NULL
+            );"""
+
+            db.execute(create_song_table)
+            db.execute(create_leaderboard_table)
+            db.execute(create_user_table)
+            db.commit()
+            print("Table reset.")
+            return True
+        except:
+            print("Something went wrong with table reset.")
+            return False
+        
+        finally:
+            db.close()
+    
+    def addUser(self):
+        return None
+
+    def updateUser(self):
+        return None
+    
+    def getUser(self):
+        return None
+    
+    def getLeaderboard(self):
+        return None
+    
+    def downloadSongs(self):
+
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            songArray = []
+            songNames = getTop50()
+            for song in songNames:
+                name = song[0]
+                artists = ' & '.join(song[1])
+                lyrics, id = getLyrics(name, artists)
+                newSong = create_song(lyrics,name,artists,id)
+                songArray.append(newSong.tuple())
+
+            cursor.executemany("INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
+            db.commit()
+            print(f'{song.name} has been added to db.')
+            
+            return True
+        except:
+            print("Something went wrong with downloading songs.")
+            return False
+        
+        finally:
+            db.close()
+
+
+
+    
+    
+    def updateSong(self):
+        return None
+    
+    def getSong(self):
+        return None
+    
+    def deleteUser(self):
+        return None
+        
+    def getPoints(self):
+        return None
+
+
     
 
