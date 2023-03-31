@@ -1,46 +1,52 @@
-let usedGuesses = [""]; // Keep track of used guesses
 
-// Used to add data to the guesses table
-
-// Get the <tbody> element
+// Get the <tbody>, button and input field elements
 const tableBody = document.querySelector('table tbody');
-
-// Get the button and input field elements
 const addGuessBtn = document.querySelector('#guess-btn');
 const guessInput = document.querySelector('#guess-input');
 
-// Add an event listener to the submit button
+// Event Listener to manage a user guesses; activates whenever submit button is clicked
 addGuessBtn.addEventListener('click', function() {
     event.preventDefault(); // prevent refresh of page
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
+
+    // Check if word was already guessed
     if(usedGuesses.includes(guessString)){
         console.log("Invalid or used word");
     }
     else{
         // Add word to already guessed words
         usedGuesses.push(guessString)
-        // Count the number of hits in the song
+        // Count the number of hits in the song and fill in the brokeSong array
         let wordCount = 0;
         for (i in finishedSong) {
             if(guessString == finishedSong[i].toLowerCase()){
                 wordCount+=1;
-                // Fill in the brokeSong array
                 brokeSong[i] = finishedSong[i];
             }
         }
-        // If they guess the song name
+
+        // If they guess the song name correctly
         if(guessString == songName.toLowerCase()){
             brokeSong = finishedSong; // Fill in the whole lyrics
             songBlank = songName; // Fill in the song name
             wordCount+=1
         }
-        // Reload page with updated solution
-        updatePage();
-        
-        // Update table
-        modifyTable(guessString,wordCount);
-}
 
+        // Send updated guess data to DB
+        sendCookie(usedGuesses);
+
+        // Update table with guess
+        modifyTable(guessString,wordCount);
+
+        // Reload page with updated info
+        updatePage();
+    }
+
+    // Clear the input field
+    guessInput.value = "";
+});
+
+// Updates table with guesses
 function modifyTable(guessString,wordCount){
     // Create a new row
     const newRow = document.createElement('tr');
@@ -64,11 +70,7 @@ function modifyTable(guessString,wordCount){
     tableBody.insertBefore(newRow, tableBody.firstChild);
 }
 
-    // Clear the input field
-    guessInput.value = "";
-});
-
-// Update the content whenever a song is loaded in, or a guess was correct
+// Update the page main-content whenever a song is loaded in, or a guess was correct
 function updatePage() {
     let title = document.getElementById('name');
     let artist = document.getElementById('artist');
@@ -93,7 +95,7 @@ function updatePage() {
         title.innerHTML += "'";
     }
 
-    // Reveal Song Artist
+    // Reveal Song Artist - MODIFY IT SO THAT ARTIST ISNT REVEALED DEPENDING ON DIFFICULTY
     artist.innerHTML += songArtist;
 
     // Format lyrics
@@ -103,17 +105,19 @@ function updatePage() {
             lyrics.innerHTML += "<br><br>";
         }
         else{
+            // If the first index of that character is a blank, the word hasn't been solved yet, and fill page with blanks
             if((brokeSong[i])[0] == "_"){
                 for(char in brokeSong[i]){
                     lyrics.innerHTML += String.fromCharCode(9619);
                 }
             }
             else{
-                lyrics.innerHTML += brokeSong[i]; // Add word by word or blank if its blank
+                lyrics.innerHTML += brokeSong[i]; // Add word by word
             }
-            lyrics.innerHTML += " ";
+            lyrics.innerHTML += " "; // Spaces between each word
         }
     }
+    // Check win condition
     roundWin();
 }
 
@@ -121,23 +125,25 @@ function updatePage() {
 function roundWin(){
     let finished = true;
     // Check if title was guessed or if all lyrics were guessed
-    if(songName != songBlank){
-        for(i in finishedSong){
+    if(songName != songBlank){ // Check if title was gussed first
+        for(i in finishedSong){ // Check every lyric if all the lyrics were filled in
             if(finishedSong[i] != brokeSong[i]){
                 finished = false;
             }
         }
     }
 
+    // Check win condition
     if(finished){
+        // Fill in title if it was guessed
         let title = document.getElementById('name');
         title.innerHTML = "";
         title.innerHTML += "'";
-        title.innerHTML += songName; // Fill in title if it was guessed
+        title.innerHTML += songName; 
         title.innerHTML += "'";
 
         // Level Ending Message
-        // Modify text based on level variable
+        // MODIFY TEXT BASED ON LEVEL VARIABLE
         popup.classList.add("open-popup"); // Load instructions popup
         overlay.style.display = 'block';
         let popupHeader = document.getElementById('popup-header');
@@ -154,21 +160,29 @@ function closePopup(){
     overlay.style.display = 'none';
 }
 
-
 // Requests Data from DB and pulls JSON data and formats it
 function requestData(){
-    console.log('hi');
+    // HAS TO BE COMPLETED TO GET SONG DATA FOR GAME
+
+    // Data received (correct if wrong):
+    // Song Name - String
+    // Song Artist - String
+    // Percentage Difficulty - String
+    // Array of strings (completed song)
+    // Array of strings (lyrics with obfuscated words)
+
+    console.log('requestData() called');
 }
 
-// Data received:
-// Song Name - String
-// Song Artist - String
-// Percentage Difficulty - String
-// Array of strings (completed song)
-// Array of strings (lyrics with obfuscated words)
+// Sends guessData to DB as a cookie
+function sendCookie(usedGuesses){
+    // HAS TO BE COMPLETED TO KEEP TRACK OF USER DATA
+    console.log("sendCookie function Activated");
+}
 
 
-// Load data from database into page (temp data below)
+
+// SAMPLE DATA BELOW FOR HARD CODED TESTING
 let songName = "Roar";
 let songBlank = "____";
 let songArtist = "Katy Perry";
@@ -182,12 +196,16 @@ let percentDif2 = "20%";
 let finishedSong2 = ['i', 'used', 'to', 'bite', 'my', 'tongue', 'and', 'hold', 'my', 'breath', 'scared', 'to', 'rock', 'the', 'boat', 'and', 'make', 'a', 'mess', 'so', 'i', 'sat', 'quietly', 'agreed', 'politely', 'i', 'guess', 'that', 'i', 'forgot', 'i', 'had', 'a', 'choice', 'i', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'i', 'stood', 'for', 'nothing', 'so', 'i', 'fell', 'for', 'everything', '~', 'you', 'held', 'me', 'down,', 'but', 'i', 'got', 'up', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', 'you', 'hear'];
 let brokeSong2 = ['_', 'used', 'to', 'bite', 'my', '______', 'and', 'hold', 'my', '______', 'scared', 'to', 'rock', 'the', '___', 'and', 'make', 'a', 'mess', 'so', 'i', 'sat', '_______', 'agreed', 'politely', '_', 'guess', 'that', '_', 'forgot', 'i', 'had', 'a', 'choice', '_', 'let', 'you', 'push', 'me', 'past', 'the', '________', 'point', 'i', 'stood', 'for', 'nothing', 'so', 'i', '____', 'for', 'everything', '~', 'you', 'held', 'me', 'down,', 'but', 'i', 'got', 'up', '(hey!)', 'already', 'brushing', 'off', '___', 'dust', 'you', 'hear'];
 
-// INITIAL STARTUP THINGS
-updatePage(); // Initial page update to load lyrics
 
+// START INITIAL STARTUP CODE
+// DO NOT MODIFY
+
+updatePage(); // Initial page update to load lyrics
 // Load instructions popup and black overlay
 popup.classList.add("open-popup"); 
 const overlay = document.querySelector('.overlay');
 overlay.style.display = 'block';
-
 let level = 1;
+let usedGuesses = [""]; // Keep track of used guesses; WILL BE SENT TO DB
+
+// END INITIAL STARTUP CODE
