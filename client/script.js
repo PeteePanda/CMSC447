@@ -143,15 +143,33 @@ function roundWin(){
         title.innerHTML += "'";
 
         // Level Ending Message
-        // MODIFY TEXT BASED ON LEVEL VARIABLE
         popup.classList.add("open-popup"); // Load instructions popup
         overlay.style.display = 'block';
         let popupHeader = document.getElementById('popup-header');
-        popupHeader.innerHTML = "Congrats you beat the level!";
         let popupText = document.getElementById('popup-text');
-        popupText.innerHTML = "You did it.";
-        level += 1;
+        let popupButton = document.getElementById('popup-button');
+
+        popupButton.innerHTML = "Next Level";
+        if(level == 1){
+            popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
+        }
+        else if(level == 2){
+            popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
+        }
+        else if(level >= 3){
+            popupHeader.innerHTML = "Congrats you beat today's Hard Level! Would you like to replay this level?";
+            popupButton.innerHTML = "Replay Level 3";
+            level = 3; // Reset level to 3
+        }
+        popupText.innerHTML = "Here's the leaderboard info in table format";
+        displayLeaderboard(level);
+        level += 1; // Progress to next level
     }
+}
+
+// Displays the leaderboard on the popup in table format, depending on the level
+function displayLeaderboard(level){
+    console.log('displayLeaderboard() called');
 }
 
 // Close instructions popup
