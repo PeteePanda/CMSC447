@@ -6,6 +6,7 @@ import os
 import requests
 from dotenv import load_dotenv
 import lyricsgenius
+from datetime import datetime
 
 
 
@@ -269,9 +270,6 @@ class Lyridact_DB:
         finally:
             db.close()
 
-
-
-    
     
     def updateSong(self):
         return None
@@ -284,6 +282,35 @@ class Lyridact_DB:
         
     def getPoints(self):
         return None
+    
+    def getSongFromDB(self, index):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"SELECT * FROM songs LIMIT 1 OFFSET {index}"
+            cursor.execute(query)
+            row = cursor.fetchall()
+
+            return row
+        except:
+            return False
+
+    def sendTodaySongs(self):
+        today = datetime.today().strftime('%Y-%m-%d')
+        random.seed(today)
+        indexes = []
+        songs =  []
+        for _ in range(3):
+            indexes.append(random.randint(1,50))
+        for index in indexes:
+            song = self.getSongFromDB(index)
+            if song == False:
+                return False
+            else:
+                songs.append(self.getSongFromDB(index))
+        
+        return songs
+
 
 
     
