@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, make_response, render_template, request
 from helperFxns import *
 
-app = Flask(__name__, template_folder="./client")
+app = Flask(__name__)
 database = Lyridact_DB("data.db")
 
 
