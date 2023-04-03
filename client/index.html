@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Lyridact - Guess the Song!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+	<div class="wrapper">
+        <div class="overlay"></div>
+        <div class = "popup" id="popup">
+            <h2 id="popup-header">How To Play</h2>
+            <p id="popup-text">
+                Welcome to "Lyridact" - a fun guessing game where you are given a random song every day from the Billboard Hot 100 with some of the lyrics redacted. 
+                <br>Your goal is to input one word at a time until you can solve the title of the song. 
+                <br>The game has three levels, and you can only progress to the next level after beating the previous one.
+                <br><br>Goodluck!
+            </p>
+            <button type="button" onclick="closePopup()">Play</button>
+        </div>
+		<div class="title">Lyridact - Guess the Song!</div>
+		<div class="content">
+			<div class="main-content">
+                <div class = "song-info">
+                    <p id = "name"></p>
+                    <p id  = "artist"></p>
+                </div>
+                <p id = "lyrics"></p>
+            </div>
+			<div class="sidebar">
+                <div class="input">
+                    <form>
+                        <div class="search-box">
+                            <input type="text" id="guess-input" placeholder="Guess a Word!">
+                            <button type="submit" id="guess-btn"><i class="fa fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Guess</th>
+                            <th>Hits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+		</div>
+	</div>
+    <script src="script.js"></script>
+</body>
+</html>
