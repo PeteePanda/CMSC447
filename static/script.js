@@ -33,7 +33,7 @@ addGuessBtn.addEventListener('click', function() {
         }
 
         // Send updated guess data to DB
-        sendCookie(usedGuesses);
+        sendUserData(usedGuesses);
 
         // Update table with guess
         modifyTable(guessString,wordCount);
@@ -175,9 +175,15 @@ function requestData(){
 }
 
 // Sends guessData to DB as a cookie
-function sendCookie(usedGuesses){
+function sendUserData(usedGuesses){
     // HAS TO BE COMPLETED TO KEEP TRACK OF USER DATA
-    console.log("sendCookie function Activated");
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/updateUser", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    var data = JSON.stringify({"words": usedGuesses, "level": level});
+    xhr.send(data);
+
+    console.log("sendUsedGuesses function Activated");
 }
 
 
@@ -205,7 +211,6 @@ updatePage(); // Initial page update to load lyrics
 popup.classList.add("open-popup"); 
 const overlay = document.querySelector('.overlay');
 overlay.style.display = 'block';
-let level = 1;
-let usedGuesses = [""]; // Keep track of used guesses; WILL BE SENT TO DB
+
 
 // END INITIAL STARTUP CODE
