@@ -7,10 +7,16 @@ import requests
 from dotenv import load_dotenv
 import lyricsgenius
 from datetime import datetime
+import string
 
 
 
 load_dotenv()
+
+def generateCookie():
+   letters = string.ascii_lowercase
+   return ''.join(random.choice(letters) for i in range(20))
+
 
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 #####
@@ -137,31 +143,16 @@ def getLyrics(songName, songArtists):
     clean_lyrics = lyrics[start:-7]
     return clean_lyrics, int(song_id)
 
-class SavePoint:
-    def __init__(self, wordsUsed, id, currentLevel):
-        self.wordsUsed = wordsUsed
-        self.songID = id
-        self.currentLevel = currentLevel
-    
-    def json(self):
-        return ({
-            "wordsUsed": self.wordsUsed,
-            "songID": self.songID,
-            "currentLevel": self.currentLevel
-        })
+
 
 class User:
-    def __init__(self, cookie, name, lvlsUnlocked, save):
-        self.id = cookie
-        self.name = name
+    def __init__(self, lvlsUnlocked, wordsUsed):
         self.unlocked = lvlsUnlocked
-        self.savePoint = save
+        self.wordsUsed = wordsUsed
     def json(self):
         return ({
-            "id": self.id,
-            "name": self.name,
             "levelsUnlocked": self.unlocked,
-            "savePoint": self.savePoint
+            "wordsUsed": self.wordsUsed
         })
 
         
@@ -209,14 +200,12 @@ class Lyridact_DB:
                 obfPatterns TEXT
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
-                user VARCHAR(255),
-                points INT NOT NULL
+                user TEXT,
+                points INTEGER
             );"""
             create_user_table = """CREATE TABLE users (
-                cookie VARCHAR(255) NOT NULL,
-                name VARCHAR(255) NOT NULL,
-                levelsUnlocked INT NOT NULL,
-                savePoint VARCHAR(255) NOT NULL
+                cookie TEXT,
+                userData TEXT
             );"""
 
             db.execute(create_song_table)
@@ -294,6 +283,8 @@ class Lyridact_DB:
             return row
         except:
             return False
+        finally:
+            db.close()
 
     def sendTodaySongs(self):
         today = datetime.today().strftime('%Y-%m-%d')
@@ -310,6 +301,59 @@ class Lyridact_DB:
                 songs.append(self.getSongFromDB(index))
         
         return songs
+    
+    def getUserFromCookie(self, cookie):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
+            cursor.execute(query)
+            row = cursor.fetchall()
+            return row
+            
+        except:
+            return False
+
+        finally:
+            db.close()
+    
+    def updateUser(self, cookie, wordlist, level):
+        user = self.getUserFromCookie(cookie)
+        person = json.loads(user[0][0])
+        person['wordsUsed'] = wordlist
+        person['levelsUnlocked'] = level
+
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"UPDATE users SET userData = '{json.dumps(person)}' WHERE cookie = '{cookie}';"
+            cursor.execute(query)
+            db.commit()
+            return True
+            
+        except:
+            return False
+        finally:
+            db.close()
+    
+    def addNewUser(self, cookie):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            newUser = User(1,[])
+            query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
+            cursor.execute(query)
+            db.commit()
+            return True
+        except:
+            return False
+        finally:
+            db.close()
+
+
+        
+
+
 
 
 
