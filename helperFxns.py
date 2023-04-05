@@ -30,7 +30,7 @@ def generateCookie():
 
 def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
     obfuscated_lyrics = []
-    lyric_array = sanitizeLyics(songLyrics,songName,percentage)
+    lyric_array = sanitizeLyics(songLyrics,songName)
     
     name_array = songName.lower().split()
     artist_array = []
@@ -38,7 +38,7 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
         artist = artist.lower().split()
         artist_array += artist
     
-    words_not_allowed = name_array + artist_array + "~"
+    words_not_allowed = name_array + artist_array
     song_length = len(lyric_array)
     obfuscation_indexes = []
 
@@ -66,7 +66,7 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
 
     return obfuscated_lyrics
 
-def sanitizeLyics(songLyrics, songName, percentage):
+def sanitizeLyics(songLyrics,songName):
 
     # Split the text using the regular expression pattern
     words = re.findall(r'\[[^\]]+\]|\S+', songLyrics.lower())
@@ -75,7 +75,6 @@ def sanitizeLyics(songLyrics, songName, percentage):
     clean = []
     line = ""
     for word in words:
-
         #if the word has an [ wait to find ] before adding ~
         if (word.find('[') != -1 or line.find('[') != -1):
             line += word
@@ -83,22 +82,31 @@ def sanitizeLyics(songLyrics, songName, percentage):
                 clean.append("~")
                 line = ""
 
-        # looks for ( to separate into separate elements
-        elif(word.find('(') != -1):
-            clean.append("(")
-            if(word.find(')') != -1):
-                clean.append(word[1:len(word) -1])
-                clean.append(")")
+        # looks for ( and ) to separate into separate elements
+        elif(word.find('(') != -1 or word.find(')') != -1):
+            line = ""
+            for x in word:
+                if(x == '('):
+                    if (line):
+                        clean.append(line)
+                    clean.append("(")
 
-            else:
-                clean.append(word[1:len(word) -1])
-            
-        elif(word.find(')') != -1):
-            clean.append(word[0:word.find(')')-1])
-            clean.append(')')
+                elif(x == ")"):
+                    if (line):
+                        clean.append(line)
+                    clean.append(")")
 
+                else:
+                    line += x
+            if (line):
+                clean.append(line)               
+                   
         else:
             clean.append(word)
+
+    if(songName == "Rich Flex"):
+        print(clean)
+        print(word)
 
     return clean
 
@@ -265,7 +273,6 @@ class Lyridact_DB:
         return None
     
     def downloadSongs(self):
-
         try:
             db = self.connect()
             cursor = db.cursor()
@@ -276,14 +283,14 @@ class Lyridact_DB:
                 artists = ' & '.join(song[1])
                 lyrics, id = getLyrics(name, artists)
                 newSong = create_song(lyrics,name,artists,id)
-                songArray.append(newSong.tuple())
-
+                if (lyrics):
+                    songArray.append(newSong.tuple())
+                
             cursor.executemany("INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
             db.commit()
             
             return True
         except:
-            print(song)
             print("Something went wrong with downloading songs.")
             return False
         
