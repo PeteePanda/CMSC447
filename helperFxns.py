@@ -369,3 +369,19 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
+    
+    def postTopFive(self, url):
+        lb = self.getLeaderboard()[:5]
+        if lb:
+            # Still need to get correct format for json from prof
+            data = {}
+            try:
+                x = requests.post(url, json=data)
+                print(x.text)
+                return True
+            except:
+                return False
+        return False
+
+
+
