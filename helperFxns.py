@@ -202,7 +202,7 @@ class Lyridact_DB:
                 obfPatterns TEXT
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
-                user TEXT,
+                cookie TEXT,
                 points INTEGER
             );"""
             create_user_table = """CREATE TABLE users (
@@ -286,7 +286,8 @@ class Lyridact_DB:
             query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
             cursor.execute(query)
             row = cursor.fetchall()
-            return row
+            user = json.loads(row[0][0])
+            return user
 
         except:
             return False
@@ -327,11 +328,44 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def getLeaderboard():
-        return None
+    def getLeaderboard(self):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"SELECT * FROM leaderboard ORDER BY points DESC"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            if data:
+                return data
+            else:
+                return False
+        except:
+            return False
+        finally:
+            db.close()
 
-    def addScoreToLeaderboard():
-        return None
+    def addScoreToLeaderboard(self, points, cookie):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"INSERT INTO leaderboard VALUES ('{cookie}', {points})"
+            cursor.execute(query)
+            db.commit()
+            return True
+        except:
+            return False
+        finally:
+            db.close()
 
-    def resetLeaderboard():
-        return None
+    def resetLeaderboard(self):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = "TRUNCATE TABLE leaderboard"
+            cursor.execute(query)
+            db.commit()
+            return True
+        except:
+            return False
+        finally:
+            db.close()
