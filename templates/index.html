@@ -36,7 +36,7 @@
                         </div>
                     </form>
                 </div>
-                <table>
+                <table id = "guessTable">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -51,9 +51,9 @@
 		</div>
 	</div>
     <script src="{{ url_for('static', filename='script.js') }}" type="text/javascript"></script>
-    <script>
+    <!-- <script>
         let level = {{ currentLevel }};
         let usedGuesses = {{ wordlist | tojson }}; 
-    </script>
+    </script> -->
 </body>
 </html>
