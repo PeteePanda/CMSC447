@@ -10,7 +10,7 @@ addGuessBtn.addEventListener('click', function() {
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
 
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "")){
+    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
         console.log("Invalid or used word");
     }
     else{
@@ -42,6 +42,9 @@ addGuessBtn.addEventListener('click', function() {
 
         // Reload page with updated info
         updatePage();
+
+        // Check win condition
+        roundWin();
     }
 
     // Clear the input field
@@ -135,30 +138,27 @@ function updatePage() {
             lyrics.innerHTML += " "; // Spaces between each word
         }
     }
-    // Check win condition
-    roundWin();
 }
 
 // Check round win at end of guess
 function roundWin(){
-    let finished = true;
-    // Check if title was guessed first
+    let titleFinished = true;
+    // Check if title was guessed first (win condition)
     for(i in songName){
         if(songName[i] != songBlank[i]){
-            finished = false;
+            titleFinished = false; // Title wasn't guessed
         }
     }
-    // If title wasn't fully guessed, check if all lyrics were guessed
-    if(finished == false){
-        for(i in finishedSong){ // Check every lyric if all the lyrics were filled in
-            if(finishedSong[i] != brokeSong[i]){
-                finished = false;
-            }
+    let lyricsFinished = true;
+    // Check if all lyrics were guessed
+    for(i in finishedSong){ // Check every lyric if all the lyrics were filled in
+        if(finishedSong[i] != brokeSong[i]){
+            lyricsFinished = false;
         }
     }
 
     // Check win condition
-    if(finished){
+    if(titleFinished || lyricsFinished){
         // Set both unfinished title and lyrics to their finished versions
         songBlank = songName;
         brokeSong = finishedSong;
@@ -210,15 +210,6 @@ function displayLeaderboard(level){
     console.log('displayLeaderboard() called');
 }
 
-// Close popup
-function closePopup(){
-    popup.classList.remove("open-popup");
-    overlay.style.display = 'none';
-    updatePage(); // Update the page with new song data
-    usedGuesses = []; // Clear used guesses list
-    clearTable(); // Empty the table
-}
-
 // Requests Data from DB and pulls JSON data and formats it
 function requestData(){
     // HAS TO BE COMPLETED TO GET SONG DATA FOR GAME
@@ -246,15 +237,34 @@ function sendUserData(usedGuesses){
     console.log(level);
 }
 
+// Creates a list of all invalid words the user cannot guess for each game.
+// This means words already in the brokeSong. They do not count as guesses.
+function listInvalids(){
+    invalidWords = []; // clear list
+    for(i in brokeSong){
+        if(brokeSong[i] == finishedSong[i]){
+            invalidWords.push(brokeSong[i].toLowerCase());
+        }
+    }
+}
 
+// Close popup ; initiates game start
+function closePopup(){
+    popup.classList.remove("open-popup");
+    overlay.style.display = 'none';
+    updatePage(); // Update the page with new song data
+    usedGuesses = []; // Clear used guesses list
+    clearTable(); // Empty the table
+    listInvalids(); // Populate a list of all invalid guesses
+}
 
 // SAMPLE DATA BELOW FOR HARD CODED TESTING
 let songName = ["Roar"];
 let songBlank = ["____"];
 let songArtist = "Katy Perry";
 let percentDif = "20%";
-let finishedSong = ['I', 'used', 'to', 'bite', 'my', 'tongue', 'and', 'hold', 'my', 'breath', 'Scared', 'to', 'rock', 'the', 'boat', 'and', 'make', 'a', 'mess', 'So', 'I', 'sat', 'quietly,', 'agreed', 'politely', 'I', 'guess', 'that', 'I', 'forgot', 'I', 'had', 'a', 'choice', 'I', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'I', 'stood', 'for', 'nothing,', 'so', 'I', 'fell', 'for', 'everything', '~', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Already', 'brushing', 'off', 'the', 'dust', 'You', 'hear', 'my', 'voice,', 'you', 'hear', 'that', 'sound', 'Like', 'thunder,', 'gonna', 'shake', 'the', 'ground', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Get', 'ready', "'cause", "I've", 'had', 'enough', 'I', 'see', 'it', 'all,', 'I', 'see', 'it', 'now', '~', 'I', 'got', 'the', 'eye', 'of', 'the', 'tiger,', 'a', 'fighter', 'Dancing', 'through', 'the', 'fire', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'Louder,', 'louder', 'than', 'a', 'lion', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh',"You're", 'gonna', 'hear', 'me', 'roar',];
-let brokeSong = ['_', '____', 'to', 'bite', '__', '______', 'and', 'hold', 'my', '______', '______', 'to', '____', 'the', 'boat', 'and', 'make', 'a', 'mess', 'so', '_', '___', '_______', '______', 'politely', 'i', 'guess', '____', 'i', 'forgot', 'i', 'had', '_', 'choice', '_', '___', 'you', 'push', '__', '____', 'the', 'breaking', 'point', '_', '_____', 'for', 'nothing', 'so', '_', 'fell', 'for', '__________', '~', '___', 'held', '__', 'down,', 'but', 'i', 'got', '__', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', '___', 'hear', '__', 'voice,', 'you', '____', '____', '_____', 'like', 'thunder', '_____', '_____', 'the', 'ground', 'you', 'held', '__', '_____', 'but', 'i', '___', '__', '_____', 'get', 'ready', '______', "i've", 'had', '______', 'i', 'see', '__', 'all,', 'i', 'see', '__', 'now', '~','i', '___', 'the', '___', '__', '___', '_____', 'a', 'fighter', 'dancing', '_______', '___', 'fire', "'cause", '_', 'am', 'a', '________', '___', '______', '_____', '____', 'me', '____', '_______', '______', 'than', 'a', '____', '______', 'i', 'am', '_', 'champion', '___', "you're", '_____', '____', 'me', '____', '__', 'oh', 'oh', '__', '__', '__', '__', '__', 'oh', '__', 'oh', 'oh', '__', 'oh', 'oh', 'oh', '__', '__', 'oh', 'oh', 'oh', '______', 'gonna', '____', 'me', '____'];
+let finishedSong = ['I', 'used', 'to', 'bite', 'my', 'tongue', 'and', 'hold', 'my', 'breath', 'Scared', 'to', 'rock', 'the', 'boat', 'and', 'make', 'a', 'mess', 'So', 'I', 'sat', 'quietly', 'agreed', 'politely', 'I', 'guess', 'that', 'I', 'forgot', 'I', 'had', 'a', 'choice', 'I', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'I', 'stood', 'for', 'nothing,', 'so', 'I', 'fell', 'for', 'everything', '~', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Already', 'brushing', 'off', 'the', 'dust', 'You', 'hear', 'my', 'voice,', 'you', 'hear', 'that', 'sound', 'Like', 'thunder,', 'gonna', 'shake', 'the', 'ground', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Get', 'ready', "'cause", "I've", 'had', 'enough', 'I', 'see', 'it', 'all,', 'I', 'see', 'it', 'now', '~', 'I', 'got', 'the', 'eye', 'of', 'the', 'tiger,', 'a', 'fighter', 'Dancing', 'through', 'the', 'fire', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'Louder,', 'louder', 'than', 'a', 'lion', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh',"You're", 'gonna', 'hear', 'me', 'roar',];
+let brokeSong = ['_', '____', 'to', 'bite', '__', '______', 'and', 'hold', '__', '______', '______', 'to', '____', 'the', 'boat', 'and', 'make', 'a', 'mess', 'so', '_', '___', '_______', '______', 'politely', 'i', 'guess', '____', 'i', 'forgot', 'i', 'had', 'a', 'choice', '_', '___', 'you', 'push', '__', '____', 'the', 'breaking', 'point', '_', '_____', 'for', 'nothing', 'so', '_', 'fell', 'for', '__________', '~', '___', 'held', '__', 'down,', 'but', 'i', 'got', '__', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', '___', 'hear', '__', 'voice,', 'you', '____', '____', '_____', 'like', 'thunder', '_____', '_____', 'the', 'ground', 'you', 'held', '__', '_____', 'but', 'i', '___', '__', '_____', 'get', 'ready', '______', "i've", 'had', '______', 'i', 'see', '__', 'all,', 'i', 'see', '__', 'now', '~','i', '___', 'the', '___', '__', '___', '_____', 'a', 'fighter', 'dancing', '_______', '___', 'fire', "'cause", '_', 'am', 'a', '________', '___', '______', '_____', '____', 'me', '____', '_______', '______', 'than', 'a', '____', '______', 'i', 'am', '_', 'champion', '___', "you're", '_____', '____', 'me', '____', '__', 'oh', 'oh', '__', '__', '__', '__', '__', 'oh', '__', 'oh', 'oh', '__', 'oh', 'oh', 'oh', '__', '__', 'oh', 'oh', 'oh', '______', 'gonna', '____', 'me', '____'];
 
 let songName2 = ["Flowers"];
 let songBlank2 = ["_______"];
@@ -277,11 +287,13 @@ let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', 'the', '_____', 'look', 
 // GET RID OF BEFORE MERGE
 let usedGuesses = [];
 let level = 1;
+// GET RID OF BEFORE MERGE
+
 
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
 popup.classList.add("open-popup"); 
 const overlay = document.querySelector('.overlay');
 overlay.style.display = 'block';
-
+let invalidWords = [];
 
 // END INITIAL STARTUP CODE
