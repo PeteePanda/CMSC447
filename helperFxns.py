@@ -69,12 +69,14 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
 def sanitizeLyics(songLyrics,songName):
 
     # Split the text using the regular expression pattern
-    words = re.findall(r'\[[^\]]+\]|\S+', songLyrics.lower())
+    nospaces = songLyrics.replace("\n"," _ ")
+    words = re.findall(r'\[[^\]]+\]|\S+' , nospaces.lower())
 
     # Merge words inside square brackets into a single element
     clean = []
     line = ""
     for word in words:
+
         #if the word has an [ wait to find ] before adding ~
         if (word.find('[') != -1 or line.find('[') != -1):
             line += word
@@ -105,6 +107,7 @@ def sanitizeLyics(songLyrics,songName):
             clean.append(word)
 
     if(songName == "Rich Flex"):
+        print(songLyrics)
         print(clean)
         print(word)
 
