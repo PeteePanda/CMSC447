@@ -151,7 +151,7 @@ function roundWin(){
     }
     let lyricsFinished = true;
     // Check if all lyrics were guessed
-    for(i in finishedSong){ // Check every lyric if all the lyrics were filled in
+    for(i in finishedSong){ // Check every word if all the lyrics were filled in
         if(finishedSong[i] != brokeSong[i]){
             lyricsFinished = false;
         }
@@ -284,10 +284,10 @@ let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', 'the', '_____', 'look', 
 // START INITIAL STARTUP CODE
 // DO NOT MODIFY
 
-// GET RID OF BEFORE MERGE
-let usedGuesses = [];
-let level = 1;
-// GET RID OF BEFORE MERGE
+// FRANCO TESTING - DO NOT INCLUDE IN MERGE
+// let usedGuesses = [];
+// let level = 1;
+// FRANCO TESTING - DO NOT INCLUDE IN MERGE
 
 
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
