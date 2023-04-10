@@ -138,15 +138,16 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 #####
-##### Takes input song lyrics, artist name, and song name as strings as
-##### well as a number 0 - 1 indicating the percentage of words to be
-##### obfuscated. 
+# Takes input song lyrics, artist name, and song name as strings as
+# well as a number 0 - 1 indicating the percentage of words to be
+# obfuscated.
 #####
-##### Returns: Dictionary with songName, songArtist, songLyrics,
-##### percentage obfuscated, and the resulting obfuscatedLyrics.
+# Returns: Dictionary with songName, songArtist, songLyrics,
+# percentage obfuscated, and the resulting obfuscatedLyrics.
 #####
-##### obfuscatedLyrics is an array of lyrics,
-##### obfuscated ones replaced with an underscore '_'
+# obfuscatedLyrics is an array of lyrics,
+# obfuscated ones replaced with an underscore '_'
+
 
 def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
     obfuscated_lyrics = []
@@ -157,7 +158,6 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
         artist = artist.lower().split()
         artist_array += artist
 
-    
     words_not_allowed = name_array + artist_array
     song_length = len(lyric_array)
     obfuscation_indexes = []
@@ -177,24 +177,26 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
         else:
             obfuscated_lyrics.append(lyric)
             counter += 1
-    
+
     plain_text_lyrics = set(range(song_length)) - set(obfuscation_indexes)
     remove = (percentage * song_length) - len(obfuscation_indexes)
 
     for x in range(round(remove)):
         plain_lyrics = list(plain_text_lyrics)
-        random_index = random.choice(plain_lyrics)     
+        random_index = random.choice(plain_lyrics)
         size = len(lyric_array[random_index])
         obfuscated_lyrics[random_index] = ("_"*size)
         plain_text_lyrics.remove(random_index)
 
     return obfuscated_lyrics
 
+
 def create_song(songLyrics, songName, songArtists, songID):
     easy = obfuscateLyrics(songLyrics, songName, songArtists, .2)
     medium = obfuscateLyrics(songLyrics, songName, songArtists, .5)
     hard = obfuscateLyrics(songLyrics, songName, songArtists, .7)
-    return(Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
+    return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
+
 
 def getSpotifyAccessToken():
     url = "https://accounts.spotify.com/api/token"
@@ -206,13 +208,14 @@ def getSpotifyAccessToken():
         "client_id": os.environ.get('SPOTIFY_CLIENT_ID'),
         "client_secret": os.environ.get('SPOTIFY_SECRET'),
     }
-    res = requests.post(url, headers=headers, data=data)    
+    res = requests.post(url, headers=headers, data=data)
 
     if res.status_code == 200:
-        
+
         return res.json()["access_token"]
     else:
         return None
+
 
 def getTop50():
     topFifty = []
@@ -222,7 +225,7 @@ def getTop50():
     if access_token == None:
         return None
     headers = {
-        'Authorization': "Bearer " + access_token, 
+        'Authorization': "Bearer " + access_token,
     }
     res = requests.get(url, headers=headers)
     if res.status_code == 200:
@@ -236,10 +239,10 @@ def getTop50():
             name = item["track"]["name"]
             topFifty.append((name, singers))
 
-        
         return topFifty
     else:
         return None
+
 
 def getLyrics(songName, songArtists):
     regex = r'[^a-zA-Z0-9\s]'
@@ -247,10 +250,10 @@ def getLyrics(songName, songArtists):
     artist = re.sub(regex, '', songArtists[0].lower())
     query = f'{name} {artist}'
     url = f"https://api.genius.com/search?q=" + re.sub(" ", "%20", query)
-   
+
     access_token = os.environ.get("GENIUS_API_KEY")
     headers = {
-        'Authorization': "Bearer " + access_token 
+        'Authorization': "Bearer " + access_token
     }
     res = requests.get(url, headers=headers)
     data = json.loads(res.text)
@@ -267,25 +270,26 @@ def getLyrics(songName, songArtists):
     return clean_lyrics, int(song_id)
 
 
-
 class User:
     def __init__(self, lvlsUnlocked, wordsUsed):
         self.unlocked = lvlsUnlocked
         self.wordsUsed = wordsUsed
+
     def json(self):
         return ({
             "levelsUnlocked": self.unlocked,
             "wordsUsed": self.wordsUsed
         })
 
-        
+
 class Song:
     def __init__(self, songID, artists, lyrics, name, obfEasy, obfMedium, obfHard):
         self.id = songID
         self.artists = artists
         self.lyrics = lyrics
         self.name = name
-        self.obfPatterns = json.dumps({"easy": obfEasy, "medium": obfMedium, "hard": obfHard})
+        self.obfPatterns = json.dumps(
+            {"easy": obfEasy, "medium": obfMedium, "hard": obfHard})
 
     def json(self):
         return ({
@@ -295,7 +299,7 @@ class Song:
             "lyrics": self.lyrics,
             "obfPatterns": self.obfPatterns
         })
-    
+
     def tuple(self):
         return ((self.id, self.artists, self.lyrics, self.name, self.obfPatterns))
 
@@ -323,7 +327,7 @@ class Lyridact_DB:
                 obfPatterns TEXT
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
-                user TEXT,
+                cookie TEXT,
                 points INTEGER
             );"""
             create_user_table = """CREATE TABLE users (
@@ -340,22 +344,10 @@ class Lyridact_DB:
         except:
             print("Something went wrong with table reset.")
             return False
-        
+
         finally:
             db.close()
-    
-    def addUser(self):
-        return None
 
-    def updateUser(self):
-        return None
-    
-    def getUser(self):
-        return None
-    
-    def getLeaderboard(self):
-        return None
-    
     def downloadSongs(self):
 
         try:
@@ -371,31 +363,18 @@ class Lyridact_DB:
                 newSong = create_song(lyrics,name,artist,id)
                 songArray.append(newSong.tuple())
 
-            cursor.executemany("INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
+            cursor.executemany(
+                "INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
             db.commit()
-            print(f'{song.name} has been added to db.')
-            
+
             return True
         except:
             print("Something went wrong with downloading songs.")
             return False
-        
+
         finally:
             db.close()
 
-    
-    def updateSong(self):
-        return None
-    
-    def getSong(self):
-        return None
-    
-    def deleteUser(self):
-        return None
-        
-    def getPoints(self):
-        return None
-    
     def getSongFromDB(self, index):
         try:
             db = self.connect()
@@ -414,18 +393,18 @@ class Lyridact_DB:
         today = datetime.today().strftime('%Y-%m-%d')
         random.seed(today)
         indexes = []
-        songs =  []
+        songs = []
         for _ in range(3):
-            indexes.append(random.randint(1,50))
+            indexes.append(random.randint(1, 50))
         for index in indexes:
             song = self.getSongFromDB(index)
             if song == False:
                 return False
             else:
                 songs.append(self.getSongFromDB(index))
-        
+
         return songs
-    
+
     def getUserFromCookie(self, cookie):
         try:
             db = self.connect()
@@ -433,14 +412,15 @@ class Lyridact_DB:
             query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
             cursor.execute(query)
             row = cursor.fetchall()
-            return row
-            
+            user = json.loads(row[0][0])
+            return user
+
         except:
             return False
 
         finally:
             db.close()
-    
+
     def updateUser(self, cookie, wordlist, level):
         user = self.getUserFromCookie(cookie)
         person = json.loads(user[0][0])
@@ -454,17 +434,17 @@ class Lyridact_DB:
             cursor.execute(query)
             db.commit()
             return True
-            
+
         except:
             return False
         finally:
             db.close()
-    
+
     def addNewUser(self, cookie):
         try:
             db = self.connect()
             cursor = db.cursor()
-            newUser = User(1,[])
+            newUser = User(1, [])
             query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
             cursor.execute(query)
             db.commit()
@@ -474,12 +454,66 @@ class Lyridact_DB:
         finally:
             db.close()
 
+    def getLeaderboard(self):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"SELECT * FROM leaderboard ORDER BY points DESC"
+            cursor.execute(query)
+            data = cursor.fetchall()
+            if data:
+                return data
+            else:
+                return False
+        except:
+            return False
+        finally:
+            db.close()
 
-        
+    def addScoreToLeaderboard(self, points, cookie):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"INSERT INTO leaderboard VALUES ('{cookie}', {points})"
+            cursor.execute(query)
+            db.commit()
+            return True
+        except:
+            return False
+        finally:
+            db.close()
 
-
-
-
-
+    def resetLeaderboard(self):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = "DROP TABLE leaderboard"
+            cursor.execute(query)
+            db.commit()
+            query = """CREATE TABLE leaderboard (
+                cookie TEXT,
+                points INTEGER
+            );"""
+            cursor.execute(query)
+            db.commit()
+            return True
+        except:
+            return False
+        finally:
+            db.close()
     
+    def postTopFive(self, url):
+        lb = self.getLeaderboard()[:5]
+        if lb:
+            # Still need to get correct format for json from prof
+            data = {}
+            try:
+                x = requests.post(url, json=data)
+                print(x.text)
+                return True
+            except:
+                return False
+        return False
+
+
 
