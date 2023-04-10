@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import lyricsgenius
 from datetime import datetime
 import string
+import numpy as np
+import pandas as pd
+
 
 
 
@@ -17,7 +20,123 @@ def generateCookie():
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(20))
 
+def findObfCombo(count_dict, target, do_obf, dont_obf):
+    words_to_obf = []
+    counter = 0
+    # Make sure the given obf words are obfd
+    for word in do_obf:
+        if word in count_dict.keys():
+            counter += count_dict[word]
+            count_dict.pop(word)
+    # While the number of obfd words is still under target
+    while counter <= target:
+        # Pick a random word
+        choice = random.choice(list(count_dict.keys()))
+        if choice in dont_obf:
+            continue
+        # Check if it doesn't exceed the percentage buffer
+        if (count_dict[choice] + counter) <= (target + 2):
+            # Add choice to return array and remove it from dict
+            words_to_obf.append(choice)
+            counter += count_dict[choice]
+            count_dict.pop(choice)
+    
+    print("Counter: ", counter)
 
+    return words_to_obf + do_obf
+
+
+def obfLyrics(songLyrics, songName, songArtists, percentage):
+    
+    dont_obf = []
+    do_obf = []
+    
+    # Scraping weirdness puts this phrase in some lyrics, remove it
+    lyrics = re.sub(r"you might also like", "", songLyrics.lower())
+    # Split the lyrics by newline, this puts every line into an index
+    # as well as giving all [Verse] lines their own index
+    lines = re.split(r"\n", lyrics)
+    
+
+    # Look at each word and record how many times they occur
+    wordlist = []
+    for line in lines:
+        if line:
+            
+            # Check for [] line and skip it
+            if line[0] == "[" and line[-1] == "]":
+                
+                continue
+            # Ensure consistent encoding
+            line = line.replace("\u0435", "\u0065")
+            # remove punctuation
+            line = re.sub(r'[\\"?().,]*', "", line)
+            
+            # create word list
+            words = line.split(" ")
+            for word in words:
+                # handle hyphenated words
+                if "-" in word:
+                    wordSplit = word.split("-")
+                    # check if all words are the same, if so append
+                    if (all(x == wordSplit[0] for x in wordSplit)):
+                        for w in wordSplit:
+                            wordlist.append(w)
+                    else:
+                        if word not in dont_obf: dont_obf.append(word)
+                        wordlist.append(word)    
+                else:
+                    wordlist.append(word)
+    # count words in song
+    df = pd.value_counts(np.array(wordlist))
+    word_count = df.to_dict()
+    # Definitely obfuscate words in title + artist names
+    do_obf += songName.lower().split()
+    for artist in songArtists:
+        do_obf += artist.lower().split()
+
+    # Calculate the number of words that need to be obf
+    songLength = len(wordlist)
+    number_of_words_to_obfuscate = round(percentage * songLength)
+    print("Song length: ", songLength)
+
+    # Determine which groups of words should be obf'd
+    obf_combo = findObfCombo(word_count, number_of_words_to_obfuscate, do_obf, dont_obf)
+
+
+
+    # Obf the lyrics
+    obfuscated_lines = []
+    for verse in lines:
+        if verse:
+            if verse[0] == "[" and verse[-1] == "]":
+                    obfuscated_lines.append("~")
+                    continue
+           
+            
+            ######### NEED LOGIC THAT OBFs any word in obf_combo ########
+            # This line is supposed to remove any misc. \ characters but it isn't working
+            verse = re.sub(r"""\\""", "", verse)
+            for obf_word in obf_combo:
+                
+                regex = r"\b" + re.escape(obf_word) + r"\b"
+                if re.sub(regex,"_"*len(obf_word), verse) != verse:
+                    verse = re.sub(regex,"_"*len(obf_word), verse)
+                    
+            
+            obfuscated_lines.append(verse)
+    
+
+    #print(wordlist)
+    pd.set_option('display.max_rows', None)
+    #print(df)
+    #print(dont_obf)
+    print(obf_combo)
+    #print(lines)
+    print(repr(obfuscated_lines))
+
+
+    
 ##### obfuscateLyrics(string, string, string, number between 0 and 1)
 #####
 ##### Takes input song lyrics, artist name, and song name as strings as
@@ -139,8 +258,13 @@ def getLyrics(songName, songArtists):
     song_id = data["response"]["hits"][0]["result"]["id"]
     genius = lyricsgenius.Genius(access_token)
     lyrics = genius.lyrics(int(song_id))
+    
     start = lyrics.find('[')
     clean_lyrics = lyrics[start:-7]
+    print(repr(clean_lyrics))
+    print(repr(songName))
+    print(repr(songArtists))
+    
     return clean_lyrics, int(song_id)
 
 
@@ -242,9 +366,10 @@ class Lyridact_DB:
             songNames = getTop50()
             for song in songNames:
                 name = song[0]
-                artists = ' & '.join(song[1])
+                artists = song[1]
                 lyrics, id = getLyrics(name, artists)
-                newSong = create_song(lyrics,name,artists,id)
+                artist = ' & '.join(artists)
+                newSong = create_song(lyrics,name,artist,id)
                 songArray.append(newSong.tuple())
 
             cursor.executemany("INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
