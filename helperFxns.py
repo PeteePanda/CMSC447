@@ -12,13 +12,13 @@ import numpy as np
 import pandas as pd
 
 
-
-
 load_dotenv()
+
 
 def generateCookie():
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(20))
+
 
 def findObfCombo(count_dict, target, do_obf, dont_obf):
     words_to_obf = []
@@ -40,38 +40,37 @@ def findObfCombo(count_dict, target, do_obf, dont_obf):
             words_to_obf.append(choice)
             counter += count_dict[choice]
             count_dict.pop(choice)
-    
+
     print("Counter: ", counter)
 
     return words_to_obf + do_obf
 
 
 def obfLyrics(songLyrics, songName, songArtists, percentage):
-    
+
     dont_obf = []
     do_obf = []
-    
+
     # Scraping weirdness puts this phrase in some lyrics, remove it
     lyrics = re.sub(r"you might also like", "", songLyrics.lower())
     # Split the lyrics by newline, this puts every line into an index
     # as well as giving all [Verse] lines their own index
     lines = re.split(r"\n", lyrics)
-    
 
     # Look at each word and record how many times they occur
     wordlist = []
     for line in lines:
         if line:
-            
+
             # Check for [] line and skip it
             if line[0] == "[" and line[-1] == "]":
-                
+
                 continue
             # Ensure consistent encoding
             line = line.replace("\u0435", "\u0065")
             # remove punctuation
             line = re.sub(r'[\\"?().,]*', "", line)
-            
+
             # create word list
             words = line.split(" ")
             for word in words:
@@ -83,8 +82,9 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                         for w in wordSplit:
                             wordlist.append(w)
                     else:
-                        if word not in dont_obf: dont_obf.append(word)
-                        wordlist.append(word)    
+                        if word not in dont_obf:
+                           dont_obf.append(word)
+                        wordlist.append(word)
                 else:
                     wordlist.append(word)
     # count words in song
@@ -101,39 +101,38 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     print("Song length: ", songLength)
 
     # Determine which groups of words should be obf'd
-    obf_combo = findObfCombo(word_count, number_of_words_to_obfuscate, do_obf, dont_obf)
-
-
+    obf_combo = findObfCombo(
+        word_count, number_of_words_to_obfuscate, do_obf, dont_obf)
 
     # Obf the lyrics
     obfuscated_lines = []
     for verse in lines:
         if verse:
             if verse[0] == "[" and verse[-1] == "]":
-                    obfuscated_lines.append("~")
-                    continue
-           
-            
+                obfuscated_lines.append("~")
+                continue
+
             ######### NEED LOGIC THAT OBFs any word in obf_combo ########
             # This line is supposed to remove any misc. \ characters but it isn't working
             verse = re.sub(r"""\\""", "", verse)
             for obf_word in obf_combo:
-                
-                regex = r"\b" + re.escape(obf_word) + r"\b"
-                if re.sub(regex,"_"*len(obf_word), verse) != verse:
-                    verse = re.sub(regex,"_"*len(obf_word), verse)
-                    
-            
-            obfuscated_lines.append(verse)
-    
 
-    #print(wordlist)
+                regex = r"\b" + re.escape(obf_word) + r"\b"
+                if re.sub(regex, "_"*len(obf_word), verse) != verse:
+                    verse = re.sub(regex, "_"*len(obf_word), verse)
+
+            obfuscated_lines.append(verse)
+
+    # print(wordlist)
     pd.set_option('display.max_rows', None)
-    #print(df)
-    #print(dont_obf)
+    # print(df)
+    # print(dont_obf)
     print(obf_combo)
-    #print(lines)
+    # print(lines)
     print(repr(obfuscated_lines))
+
+    ## STILL NEED TO TAKE obfuscated_lines
+    ## add ~ end of each index and convert to 1d array
 
 
     
