@@ -71,10 +71,7 @@ class TestUtils(unittest.TestCase):
         artists = ['PinkPantheress', 'Ice Spice']
         
         easy = obfLyrics(lyrics, name, artists, .2)
-
-
-
-
+        print(easy)
 
         return True
     

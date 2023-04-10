@@ -20,33 +20,33 @@ def generateCookie():
    return ''.join(random.choice(letters) for i in range(20))
 
 
-def findObfCombo(count_dict, target, do_obf, dont_obf):
-    words_to_obf = []
-    counter = 0
-    # Make sure the given obf words are obfd
-    for word in do_obf:
-        if word in count_dict.keys():
-            counter += count_dict[word]
-            count_dict.pop(word)
-    # While the number of obfd words is still under target
-    while counter <= target:
-        # Pick a random word
-        choice = random.choice(list(count_dict.keys()))
-        if choice in dont_obf:
-            continue
-        # Check if it doesn't exceed the percentage buffer
-        if (count_dict[choice] + counter) <= (target + 2):
-            # Add choice to return array and remove it from dict
-            words_to_obf.append(choice)
-            counter += count_dict[choice]
-            count_dict.pop(choice)
-
-    print("Counter: ", counter)
-
-    return words_to_obf + do_obf
-
 
 def obfLyrics(songLyrics, songName, songArtists, percentage):
+
+    def findObfCombo(count_dict, target, do_obf, dont_obf):
+        words_to_obf = []
+        counter = 0
+        # Make sure the given obf words are obfd
+        for word in do_obf:
+            if word in count_dict.keys():
+                counter += count_dict[word]
+                count_dict.pop(word)
+        # While the number of obfd words is still under target
+        while counter <= target:
+            # Pick a random word
+            choice = random.choice(list(count_dict.keys()))
+            if choice in dont_obf:
+                continue
+            # Check if it doesn't exceed the percentage buffer
+            if (count_dict[choice] + counter) <= (target + 2):
+                # Add choice to return array and remove it from dict
+                words_to_obf.append(choice)
+                counter += count_dict[choice]
+                count_dict.pop(choice)
+
+       
+
+        return words_to_obf + do_obf
 
     dont_obf = []
     do_obf = []
@@ -102,7 +102,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     # Calculate the number of words that need to be obf
     songLength = len(wordlist)
     number_of_words_to_obfuscate = round(percentage * songLength)
-    print("Song length: ", songLength)
+    
 
     # Determine which groups of words should be obf'd
     obf_combo = findObfCombo(
@@ -127,21 +127,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
             obfuscated_lines.append(verse)
 
-    # print(wordlist)
-    pd.set_option('display.max_rows', None)
-    # print(df)
-    # print(dont_obf)
-    print(obf_combo)
-    # print(lines)
-    print(repr(obfuscated_lines))
-    #print(diff_list)
-
-
-
-
-    ## STILL NEED TO TAKE obfuscated_lines
-    ## add ~ end of each index and convert to 1d array
-
+    # add ~ to the end of each line for franco's spacing, convert to 1d array
     return_array = []
     for line in obfuscated_lines:
         if "~" not in line:
@@ -153,66 +139,10 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     
 
 
-    
-##### obfuscateLyrics(string, string, string, number between 0 and 1)
-#####
-# Takes input song lyrics, artist name, and song name as strings as
-# well as a number 0 - 1 indicating the percentage of words to be
-# obfuscated.
-#####
-# Returns: Dictionary with songName, songArtist, songLyrics,
-# percentage obfuscated, and the resulting obfuscatedLyrics.
-#####
-# obfuscatedLyrics is an array of lyrics,
-# obfuscated ones replaced with an underscore '_'
-
-
-def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
-    obfuscated_lyrics = []
-    lyric_array = songLyrics.lower().split()
-    name_array = songName.lower().split()
-    artist_array = []
-    for artist in songArtists:
-        artist = artist.lower().split()
-        artist_array += artist
-
-    words_not_allowed = name_array + artist_array
-    song_length = len(lyric_array)
-    obfuscation_indexes = []
-
-    counter = 0
-
-    for lyric in lyric_array:
-        if (re.search(r"\[[\w]*\]", lyric) != None):
-            obfuscation_indexes.append(counter)
-            counter += 1
-            obfuscated_lyrics.append("~")
-        elif lyric in words_not_allowed:
-            obfuscation_indexes.append(counter)
-            counter += 1
-            size = len(lyric)
-            obfuscated_lyrics.append(("_"*size))
-        else:
-            obfuscated_lyrics.append(lyric)
-            counter += 1
-
-    plain_text_lyrics = set(range(song_length)) - set(obfuscation_indexes)
-    remove = (percentage * song_length) - len(obfuscation_indexes)
-
-    for x in range(round(remove)):
-        plain_lyrics = list(plain_text_lyrics)
-        random_index = random.choice(plain_lyrics)
-        size = len(lyric_array[random_index])
-        obfuscated_lyrics[random_index] = ("_"*size)
-        plain_text_lyrics.remove(random_index)
-
-    return obfuscated_lyrics
-
-
 def create_song(songLyrics, songName, songArtists, songID):
-    easy = obfuscateLyrics(songLyrics, songName, songArtists, .2)
-    medium = obfuscateLyrics(songLyrics, songName, songArtists, .5)
-    hard = obfuscateLyrics(songLyrics, songName, songArtists, .7)
+    easy = obfLyrics(songLyrics, songName, songArtists, .2)
+    medium = obfLyrics(songLyrics, songName, songArtists, .5)
+    hard = obfLyrics(songLyrics, songName, songArtists, .7)
     return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
 
 
