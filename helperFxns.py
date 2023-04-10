@@ -146,18 +146,6 @@ def getLyrics(songName, songArtists):
     clean_lyrics = lyrics[start:-7]
     return clean_lyrics, int(song_id)
 
-class SavePoint:
-    def __init__(self, wordsUsed, id, currentLevel):
-        self.wordsUsed = wordsUsed
-        self.songID = id
-        self.currentLevel = currentLevel
-    
-    def json(self):
-        return ({
-            "wordsUsed": self.wordsUsed,
-            "songID": self.songID,
-            "currentLevel": self.currentLevel
-        })
 
 class User:
     def __init__(self, lvlsUnlocked, wordsUsed):
