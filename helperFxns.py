@@ -363,7 +363,13 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = "TRUNCATE TABLE leaderboard"
+            query = "DROP TABLE leaderboard"
+            cursor.execute(query)
+            db.commit()
+            query = """CREATE TABLE leaderboard (
+                cookie TEXT,
+                points INTEGER
+            );"""
             cursor.execute(query)
             db.commit()
             return True
