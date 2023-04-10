@@ -11,12 +11,12 @@
         <div class = "popup" id="popup">
             <h2 id="popup-header">How To Play</h2>
             <p id="popup-text">
-                Welcome to "Lyridact" - a fun guessing game where you are given a random song every day from the Billboard Hot 100 with some of the lyrics redacted. 
+                Welcome to "Lyridact" - a fun guessing game where you are given a random song every day from Spotify's U.S. Top 50 Charts with some of the lyrics redacted. 
                 <br>Your goal is to input one word at a time until you can solve the title of the song. 
                 <br>The game has three levels, and you can only progress to the next level after beating the previous one.
                 <br><br>Goodluck!
             </p>
-            <button type="button" onclick="closePopup()">Play</button>
+            <button type="button" onclick="closePopup()" id="popup-button">Play</button>
         </div>
 		<div class="title">Lyridact - Guess the Song!</div>
 		<div class="content">
@@ -36,7 +36,7 @@
                         </div>
                     </form>
                 </div>
-                <table>
+                <table id = "guessTable">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -55,6 +55,5 @@
         let level = {{ currentLevel }};
         let usedGuesses = {{ wordlist | tojson }}; 
     </script>
-    
 </body>
 </html>

@@ -9,7 +9,14 @@ import lyricsgenius
 from datetime import datetime
 import string
 
+
+
 load_dotenv()
+
+def generateCookie():
+   letters = string.ascii_lowercase
+   return ''.join(random.choice(letters) for i in range(20))
+
 
 # obfuscateLyrics(string, string, string, number between 0 and 1)
 #####
@@ -64,11 +71,6 @@ def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
         plain_text_lyrics.remove(random_index)
 
     return obfuscated_lyrics
-
-
-def generateCookie():
-   letters = string.ascii_lowercase
-   return ''.join(random.choice(letters) for i in range(20))
 
 
 def create_song(songLyrics, songName, songArtists, songID):
@@ -144,6 +146,18 @@ def getLyrics(songName, songArtists):
     clean_lyrics = lyrics[start:-7]
     return clean_lyrics, int(song_id)
 
+class SavePoint:
+    def __init__(self, wordsUsed, id, currentLevel):
+        self.wordsUsed = wordsUsed
+        self.songID = id
+        self.currentLevel = currentLevel
+    
+    def json(self):
+        return ({
+            "wordsUsed": self.wordsUsed,
+            "songID": self.songID,
+            "currentLevel": self.currentLevel
+        })
 
 class User:
     def __init__(self, lvlsUnlocked, wordsUsed):
