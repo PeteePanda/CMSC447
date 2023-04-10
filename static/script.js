@@ -285,8 +285,8 @@ let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', 'the', '_____', 'look', 
 // DO NOT MODIFY
 
 // FRANCO TESTING - DO NOT INCLUDE IN MERGE
-// let usedGuesses = [];
-// let level = 1;
+let usedGuesses = [];
+let level = 1;
 // FRANCO TESTING - DO NOT INCLUDE IN MERGE
 
 
