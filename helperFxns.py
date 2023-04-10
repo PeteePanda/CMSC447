@@ -59,6 +59,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Look at each word and record how many times they occur
     wordlist = []
+    diff_list = []
     for line in lines:
         if line:
 
@@ -68,11 +69,14 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                 continue
             # Ensure consistent encoding
             line = line.replace("\u0435", "\u0065")
+            line = line.replace('"', "'")
+
             # remove punctuation
-            line = re.sub(r'[\\"?().,]*', "", line)
+            clean_line = re.sub(r"""[\\'"?().!,]*""", "", line)
 
             # create word list
-            words = line.split(" ")
+            words = clean_line.split(" ")
+            diff_list.append((line, words))
             for word in words:
                 # handle hyphenated words
                 if "-" in word:
@@ -114,7 +118,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
             ######### NEED LOGIC THAT OBFs any word in obf_combo ########
             # This line is supposed to remove any misc. \ characters but it isn't working
-            verse = re.sub(r"""\\""", "", verse)
+            verse = re.sub(r'"', "'", verse)
             for obf_word in obf_combo:
 
                 regex = r"\b" + re.escape(obf_word) + r"\b"
@@ -130,9 +134,23 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     print(obf_combo)
     # print(lines)
     print(repr(obfuscated_lines))
+    #print(diff_list)
+
+
+
 
     ## STILL NEED TO TAKE obfuscated_lines
     ## add ~ end of each index and convert to 1d array
+
+    return_array = []
+    for line in obfuscated_lines:
+        if "~" not in line:
+            line = line + "~"
+        words = line.split()
+        return_array += words
+    
+    return return_array
+    
 
 
     
