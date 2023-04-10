@@ -20,7 +20,6 @@ def generateCookie():
    return ''.join(random.choice(letters) for i in range(20))
 
 
-
 def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     def findObfCombo(count_dict, target, do_obf, dont_obf):
@@ -43,8 +42,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                 words_to_obf.append(choice)
                 counter += count_dict[choice]
                 count_dict.pop(choice)
-
-       
 
         return words_to_obf + do_obf
 
@@ -102,7 +99,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     # Calculate the number of words that need to be obf
     songLength = len(wordlist)
     number_of_words_to_obfuscate = round(percentage * songLength)
-    
 
     # Determine which groups of words should be obf'd
     obf_combo = findObfCombo(
@@ -134,88 +130,8 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             line = line + "~"
         words = line.split()
         return_array += words
-    
+
     return return_array
-    
-
-
-def create_song(songLyrics, songName, songArtists, songID):
-    easy = obfLyrics(songLyrics, songName, songArtists, .2)
-    medium = obfLyrics(songLyrics, songName, songArtists, .5)
-    hard = obfLyrics(songLyrics, songName, songArtists, .7)
-    return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
-
-
-def getSpotifyAccessToken():
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        'Content-Type': "application/x-www-form-urlencoded"
-    }
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": os.environ.get('SPOTIFY_CLIENT_ID'),
-        "client_secret": os.environ.get('SPOTIFY_SECRET'),
-    }
-    res = requests.post(url, headers=headers, data=data)
-
-    if res.status_code == 200:
-
-        return res.json()["access_token"]
-    else:
-        return None
-
-
-def getTop50():
-    topFifty = []
-    playlist_id = "37i9dQZEVXbLp5XoPON0wI"
-    url = "https://api.spotify.com/v1/playlists/" + playlist_id
-    access_token = getSpotifyAccessToken()
-    if access_token == None:
-        return None
-    headers = {
-        'Authorization': "Bearer " + access_token,
-    }
-    res = requests.get(url, headers=headers)
-    if res.status_code == 200:
-        data = res.json()["tracks"]["items"]
-        for item in data:
-            singers = []
-            artists = item["track"]["artists"]
-            for artist in artists:
-                singerName = artist["name"]
-                singers.append(singerName)
-            name = item["track"]["name"]
-            topFifty.append((name, singers))
-
-        return topFifty
-    else:
-        return None
-
-
-def getLyrics(songName, songArtists):
-    regex = r'[^a-zA-Z0-9\s]'
-    name = re.sub(regex, '', songName.lower())
-    artist = re.sub(regex, '', songArtists[0].lower())
-    query = f'{name} {artist}'
-    url = f"https://api.genius.com/search?q=" + re.sub(" ", "%20", query)
-
-    access_token = os.environ.get("GENIUS_API_KEY")
-    headers = {
-        'Authorization': "Bearer " + access_token
-    }
-    res = requests.get(url, headers=headers)
-    data = json.loads(res.text)
-    song_id = data["response"]["hits"][0]["result"]["id"]
-    genius = lyricsgenius.Genius(access_token)
-    lyrics = genius.lyrics(int(song_id))
-    
-    start = lyrics.find('[')
-    clean_lyrics = lyrics[start:-7]
-    print(repr(clean_lyrics))
-    print(repr(songName))
-    print(repr(songArtists))
-    
-    return clean_lyrics, int(song_id)
 
 
 class User:
@@ -298,6 +214,83 @@ class Lyridact_DB:
 
     def downloadSongs(self):
 
+        def getSpotifyAccessToken():
+            url = "https://accounts.spotify.com/api/token"
+            headers = {
+                'Content-Type': "application/x-www-form-urlencoded"
+            }
+            data = {
+                "grant_type": "client_credentials",
+                "client_id": os.environ.get('SPOTIFY_CLIENT_ID'),
+                "client_secret": os.environ.get('SPOTIFY_SECRET'),
+            }
+            res = requests.post(url, headers=headers, data=data)
+
+            if res.status_code == 200:
+
+                return res.json()["access_token"]
+            else:
+                return None
+
+        def getTop50():
+
+            topFifty = []
+            playlist_id = "37i9dQZEVXbLp5XoPON0wI"
+            url = "https://api.spotify.com/v1/playlists/" + playlist_id
+            access_token = getSpotifyAccessToken()
+            if access_token == None:
+                return None
+            headers = {
+                'Authorization': "Bearer " + access_token,
+            }
+            res = requests.get(url, headers=headers)
+            if res.status_code == 200:
+                data = res.json()["tracks"]["items"]
+                for item in data:
+                    singers = []
+                    artists = item["track"]["artists"]
+                    for artist in artists:
+                        singerName = artist["name"]
+                        singers.append(singerName)
+                    name = item["track"]["name"]
+                    topFifty.append((name, singers))
+
+                return topFifty
+            else:
+                return None
+
+        def create_song(songLyrics, songName, songArtists, songID):
+            easy = obfLyrics(songLyrics, songName, songArtists, .2)
+            medium = obfLyrics(songLyrics, songName, songArtists, .5)
+            hard = obfLyrics(songLyrics, songName, songArtists, .7)
+            return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
+
+        def getLyrics(songName, songArtists):
+            regex = r'[^a-zA-Z0-9\s]'
+            name = re.sub(regex, '', songName.lower())
+            artist = re.sub(regex, '', songArtists[0].lower())
+            query = f'{name} {artist}'
+            url = f"https://api.genius.com/search?q=" + \
+                re.sub(" ", "%20", query)
+
+            access_token = os.environ.get("GENIUS_API_KEY")
+            headers = {
+                'Authorization': "Bearer " + access_token
+            }
+            res = requests.get(url, headers=headers)
+            data = json.loads(res.text)
+            song_id = data["response"]["hits"][0]["result"]["id"]
+            genius = lyricsgenius.Genius(access_token)
+            lyrics = genius.lyrics(int(song_id))
+
+            start = lyrics.find('[')
+            clean_lyrics = lyrics[start:-7]
+            print(repr(clean_lyrics))
+            print(repr(songName))
+            print(repr(songArtists))
+
+            return clean_lyrics, int(song_id)
+
         try:
             db = self.connect()
             cursor = db.cursor()
@@ -308,7 +301,7 @@ class Lyridact_DB:
                 artists = song[1]
                 lyrics, id = getLyrics(name, artists)
                 artist = ' & '.join(artists)
-                newSong = create_song(lyrics,name,artist,id)
+                newSong = create_song(lyrics, name, artist, id)
                 songArray.append(newSong.tuple())
 
             cursor.executemany(
@@ -449,7 +442,7 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
-    
+
     def postTopFive(self, url):
         lb = self.getLeaderboard()[:5]
         if lb:
