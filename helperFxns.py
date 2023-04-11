@@ -8,143 +8,139 @@ from dotenv import load_dotenv
 import lyricsgenius
 from datetime import datetime
 import string
-
-
+import numpy as np
+import pandas as pd
+import warnings
 
 load_dotenv()
+
 
 def generateCookie():
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(20))
 
 
-# obfuscateLyrics(string, string, string, number between 0 and 1)
-#####
-# Takes input song lyrics, artist name, and song name as strings as
-# well as a number 0 - 1 indicating the percentage of words to be
-# obfuscated.
-#####
-# Returns: Dictionary with songName, songArtist, songLyrics,
-# percentage obfuscated, and the resulting obfuscatedLyrics.
-#####
-# obfuscatedLyrics is an array of lyrics,
-# obfuscated ones replaced with an underscore '_'
+def obfLyrics(songLyrics, songName, songArtists, percentage):
 
+    def findObfCombo(count_dict, target, do_obf, dont_obf):
+        words_to_obf = []
+        counter = 0
+        # Make sure the given obf words are obfd
+        for word in do_obf:
+            if word in count_dict.keys():
+                counter += count_dict[word]
+                count_dict.pop(word)
+        # While the number of obfd words is still under target
+        while counter <= target:
+            # Pick a random word
+            choice = random.choice(list(count_dict.keys()))
+            if choice in dont_obf:
+                continue
+            # Check if it doesn't exceed the percentage buffer
+            if (count_dict[choice] + counter) <= (target + 2):
+                # Add choice to return array and remove it from dict
+                words_to_obf.append(choice)
+                counter += count_dict[choice]
+                count_dict.pop(choice)
 
-def obfuscateLyrics(songLyrics, songName, songArtists, percentage):
-    obfuscated_lyrics = []
-    lyric_array = songLyrics.lower().split()
-    name_array = songName.lower().split()
-    artist_array = []
+        return words_to_obf + do_obf
+
+    dont_obf = []
+    do_obf = []
+
+    # Scraping weirdness puts this phrase in some lyrics, remove it
+    lyrics = re.sub(r"you might also like", "", songLyrics.lower())
+    # Split the lyrics by newline, this puts every line into an index
+    # as well as giving all [Verse] lines their own index
+    lines = re.split(r"\n", lyrics)
+
+    # Look at each word and record how many times they occur
+    wordlist = []
+
+    for line in lines:
+        if line:
+
+            # Check for [] line and skip it
+            if line[0] == "[" and line[-1] == "]":
+
+                continue
+            # Ensure consistent encoding
+            line = line.replace("\u0435", "\u0065")
+            line = line.replace('"', "'")
+
+            # remove punctuation
+            clean_line = re.sub(r"""[\\'"?().!,]*""", "", line)
+
+            # create word list
+            words = clean_line.split(" ")
+
+            for word in words:
+                # handle hyphenated words
+                if "-" in word:
+                    wordSplit = word.split("-")
+                    # check if all words are the same, if so append
+                    if (all(x == wordSplit[0] for x in wordSplit)):
+                        for w in wordSplit:
+                            wordlist.append(w)
+                    else:
+                        if word not in dont_obf:
+                           dont_obf.append(word)
+                        wordlist.append(word)
+                else:
+                    wordlist.append(word)
+    # count words in song
+    df = pd.value_counts(np.array(wordlist))
+    word_count = df.to_dict()
+    # Definitely obfuscate words in title + artist names
+    do_obf += songName.lower().split()
     for artist in songArtists:
-        artist = artist.lower().split()
-        artist_array += artist
+        do_obf += artist.lower().split()
 
-    words_not_allowed = name_array + artist_array
-    song_length = len(lyric_array)
-    obfuscation_indexes = []
+    # Calculate the number of words that need to be obf
+    songLength = len(wordlist)
+    number_of_words_to_obfuscate = round(percentage * songLength)
 
-    counter = 0
+    # Determine which groups of words should be obf'd
+    obf_combo = findObfCombo(
+        word_count, number_of_words_to_obfuscate, do_obf, dont_obf)
 
-    for lyric in lyric_array:
-        if (re.search(r"\[[\w]*\]", lyric) != None):
-            obfuscation_indexes.append(counter)
-            counter += 1
-            obfuscated_lyrics.append("~")
-        elif lyric in words_not_allowed:
-            obfuscation_indexes.append(counter)
-            counter += 1
-            size = len(lyric)
-            obfuscated_lyrics.append(("_"*size))
-        else:
-            obfuscated_lyrics.append(lyric)
-            counter += 1
+    # Obf the lyrics
+    obfuscated_lines = []
+    for verse in lines:
+        if verse:
+            if verse[0] == "[" and verse[-1] == "]":
+                obfuscated_lines.append("~")
+                continue
 
-    plain_text_lyrics = set(range(song_length)) - set(obfuscation_indexes)
-    remove = (percentage * song_length) - len(obfuscation_indexes)
+            verse = re.sub(r'"', "'", verse)
+            for obf_word in obf_combo:
 
-    for x in range(round(remove)):
-        plain_lyrics = list(plain_text_lyrics)
-        random_index = random.choice(plain_lyrics)
-        size = len(lyric_array[random_index])
-        obfuscated_lyrics[random_index] = ("_"*size)
-        plain_text_lyrics.remove(random_index)
+                regex = r"\b" + re.escape(obf_word) + r"\b"
+                if re.sub(regex, "_"*len(obf_word), verse) != verse:
+                    verse = re.sub(regex, "_"*len(obf_word), verse)
 
-    return obfuscated_lyrics
+            obfuscated_lines.append(verse)
 
+    # add ~ to the end of each line for franco's spacing, convert to 1d array
+    return_obf_array = []
+    for line in obfuscated_lines:
+        if "~" not in line:
+            line = line + "~"
+        words = line.split()
+        return_obf_array += words
 
-def create_song(songLyrics, songName, songArtists, songID):
-    easy = obfuscateLyrics(songLyrics, songName, songArtists, .2)
-    medium = obfuscateLyrics(songLyrics, songName, songArtists, .5)
-    hard = obfuscateLyrics(songLyrics, songName, songArtists, .7)
-    return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
+    return_clean_array = []
+    for line in lines:
+        if line:
+            line.replace('"', "'")
+            if line[0] == "[" and line[-1] == "]":
+                return_clean_array.append("~")
+                continue
+            line = line + "~"
+            words = line.split()
+            return_clean_array += words
 
-
-def getSpotifyAccessToken():
-    url = "https://accounts.spotify.com/api/token"
-    headers = {
-        'Content-Type': "application/x-www-form-urlencoded"
-    }
-    data = {
-        "grant_type": "client_credentials",
-        "client_id": os.environ.get('SPOTIFY_CLIENT_ID'),
-        "client_secret": os.environ.get('SPOTIFY_SECRET'),
-    }
-    res = requests.post(url, headers=headers, data=data)
-
-    if res.status_code == 200:
-
-        return res.json()["access_token"]
-    else:
-        return None
-
-
-def getTop50():
-    topFifty = []
-    playlist_id = "37i9dQZEVXbLp5XoPON0wI"
-    url = "https://api.spotify.com/v1/playlists/" + playlist_id
-    access_token = getSpotifyAccessToken()
-    if access_token == None:
-        return None
-    headers = {
-        'Authorization': "Bearer " + access_token,
-    }
-    res = requests.get(url, headers=headers)
-    if res.status_code == 200:
-        data = res.json()["tracks"]["items"]
-        for item in data:
-            singers = []
-            artists = item["track"]["artists"]
-            for artist in artists:
-                singerName = artist["name"]
-                singers.append(singerName)
-            name = item["track"]["name"]
-            topFifty.append((name, singers))
-
-        return topFifty
-    else:
-        return None
-
-
-def getLyrics(songName, songArtists):
-    regex = r'[^a-zA-Z0-9\s]'
-    name = re.sub(regex, '', songName.lower())
-    artist = re.sub(regex, '', songArtists[0].lower())
-    query = f'{name} {artist}'
-    url = f"https://api.genius.com/search?q=" + re.sub(" ", "%20", query)
-
-    access_token = os.environ.get("GENIUS_API_KEY")
-    headers = {
-        'Authorization': "Bearer " + access_token
-    }
-    res = requests.get(url, headers=headers)
-    data = json.loads(res.text)
-    song_id = data["response"]["hits"][0]["result"]["id"]
-    genius = lyricsgenius.Genius(access_token)
-    lyrics = genius.lyrics(int(song_id))
-    start = lyrics.find('[')
-    clean_lyrics = lyrics[start:-7]
-    return clean_lyrics, int(song_id)
+    return return_obf_array, return_clean_array
 
 
 class User:
@@ -162,23 +158,14 @@ class User:
 class Song:
     def __init__(self, songID, artists, lyrics, name, obfEasy, obfMedium, obfHard):
         self.id = songID
-        self.artists = artists
+        self.artists = " & ".join(artists)
         self.lyrics = lyrics
         self.name = name
-        self.obfPatterns = json.dumps(
-            {"easy": obfEasy, "medium": obfMedium, "hard": obfHard})
-
-    def json(self):
-        return ({
-            "id": self.id,
-            "artists": self.artists,
-            "name": self.name,
-            "lyrics": self.lyrics,
-            "obfPatterns": self.obfPatterns
-        })
+        self.obfPatterns = {"easy": obfEasy,
+                            "medium": obfMedium, "hard": obfHard}
 
     def tuple(self):
-        return ((self.id, self.artists, self.lyrics, self.name, self.obfPatterns))
+        return (self.id, json.dumps({"artists": self.artists, "lyrics": self.lyrics, "name": self.name, "obfPatterns": self.obfPatterns}))
 
 
 class Lyridact_DB:
@@ -198,10 +185,7 @@ class Lyridact_DB:
             db = self.connect()
             create_song_table = """CREATE TABLE songs (
                 id INTEGER,
-                artists TEXT,
-                lyrics TEXT,
-                name TEXT,
-                obfPatterns TEXT
+                songData TEXT
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
                 cookie TEXT,
@@ -225,27 +209,125 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def downloadSongs(self):
+    def downloadSongs(self, subset):
+        # subset allows you to download only subset number of songs
+
+        def getSpotifyAccessToken():
+            url = "https://accounts.spotify.com/api/token"
+            headers = {
+                'Content-Type': "application/x-www-form-urlencoded"
+            }
+            data = {
+                "grant_type": "client_credentials",
+                "client_id": os.environ.get('SPOTIFY_CLIENT_ID'),
+                "client_secret": os.environ.get('SPOTIFY_SECRET'),
+            }
+            res = requests.post(url, headers=headers, data=data)
+
+            if res.status_code == 200:
+
+                return res.json()["access_token"]
+            else:
+                return None
+
+        def getTop50():
+
+            topFifty = []
+            playlist_id = "37i9dQZEVXbLp5XoPON0wI"
+            url = "https://api.spotify.com/v1/playlists/" + playlist_id
+            access_token = getSpotifyAccessToken()
+            if access_token == None:
+                return None
+            headers = {
+                'Authorization': "Bearer " + access_token,
+            }
+            res = requests.get(url, headers=headers)
+            if res.status_code == 200:
+                data = res.json()["tracks"]["items"]
+                for item in data:
+                    singers = []
+                    artists = item["track"]["artists"]
+                    for artist in artists:
+                        singerName = artist["name"]
+                        singers.append(singerName)
+                    name = item["track"]["name"]
+                    if name and singers:
+                        topFifty.append((name, singers))
+
+                return topFifty
+            else:
+                return None
+
+        def create_song(songLyrics, songName, songArtists, songID):
+            easy, clean_lyrics = obfLyrics(
+                songLyrics, songName, songArtists, .2)
+            medium = obfLyrics(songLyrics, songName, songArtists, .5)[0]
+            hard = obfLyrics(songLyrics, songName, songArtists, .7)[0]
+            return (Song(songID, songArtists, clean_lyrics, songName, easy, medium, hard))
+
+        def getLyrics(songName, songArtists):
+            regex = r'[^a-zA-Z0-9\s]'
+            name = re.sub(regex, '', songName.lower())
+            artist = re.sub(regex, '', songArtists[0].lower())
+            query = f'{name} {artist}'
+            url = f"https://api.genius.com/search?q=" + \
+                re.sub(" ", "%20", query)
+
+            access_token = os.environ.get("GENIUS_API_KEY")
+            headers = {
+                'Authorization': "Bearer " + access_token
+            }
+            res = requests.get(url, headers=headers)
+            data = json.loads(res.text)
+            try:
+                song_id = data["response"]["hits"][0]["result"]["id"]
+            except:
+                return False, False
+            genius = lyricsgenius.Genius(access_token)
+            lyrics = genius.lyrics(int(song_id))
+
+            start = lyrics.find('[')
+            if start == -1:
+                print("These lyrics aren't properly formatted, skipping")
+                return False, False
+            clean_lyrics = lyrics[start:-7]
+
+            print(repr(songName))
+            print(repr(songArtists))
+
+            return clean_lyrics, int(song_id)
 
         try:
             db = self.connect()
             cursor = db.cursor()
             songArray = []
             songNames = getTop50()
+            counter = 0
             for song in songNames:
-                name = song[0]
-                artists = ' & '.join(song[1])
-                lyrics, id = getLyrics(name, artists)
-                newSong = create_song(lyrics, name, artists, id)
-                songArray.append(newSong.tuple())
+                if song:
+                    counter += 1
+                    if counter > subset:
+                        break
+
+                    name = song[0]
+                    artists = song[1]
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        lyrics, id = getLyrics(name, artists)
+                    if lyrics == False and id == False:
+                        continue
+
+                    newSong = create_song(lyrics, name, artists, id)
+                    songArray.append(newSong.tuple())
 
             cursor.executemany(
-                "INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
+                "INSERT INTO songs VALUES (?,?)", songArray)
             db.commit()
 
             return True
-        except:
+        except Exception as e:
             print("Something went wrong with downloading songs.")
+            print(e)
             return False
 
         finally:
@@ -377,7 +459,7 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
-    
+
     def postTopFive(self, url):
         lb = self.getLeaderboard()[:5]
         if lb:
@@ -390,6 +472,3 @@ class Lyridact_DB:
             except:
                 return False
         return False
-
-
-
