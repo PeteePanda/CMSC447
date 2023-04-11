@@ -10,7 +10,7 @@ from datetime import datetime
 import string
 import numpy as np
 import pandas as pd
-
+import warnings
 
 load_dotenv()
 
@@ -56,7 +56,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Look at each word and record how many times they occur
     wordlist = []
-    diff_list = []
+
     for line in lines:
         if line:
 
@@ -73,7 +73,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
             # create word list
             words = clean_line.split(" ")
-            diff_list.append((line, words))
+
             for word in words:
                 # handle hyphenated words
                 if "-" in word:
@@ -112,8 +112,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                 obfuscated_lines.append("~")
                 continue
 
-            ######### NEED LOGIC THAT OBFs any word in obf_combo ########
-            # This line is supposed to remove any misc. \ characters but it isn't working
             verse = re.sub(r'"', "'", verse)
             for obf_word in obf_combo:
 
@@ -124,14 +122,25 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             obfuscated_lines.append(verse)
 
     # add ~ to the end of each line for franco's spacing, convert to 1d array
-    return_array = []
+    return_obf_array = []
     for line in obfuscated_lines:
         if "~" not in line:
             line = line + "~"
         words = line.split()
-        return_array += words
+        return_obf_array += words
 
-    return return_array
+    return_clean_array = []
+    for line in lines:
+        if line:
+            line.replace('"', "'")
+            if line[0] == "[" and line[-1] == "]":
+                return_clean_array.append("~")
+                continue
+            line = line + "~"
+            words = line.split()
+            return_clean_array += words
+
+    return return_obf_array, return_clean_array
 
 
 class User:
@@ -149,23 +158,14 @@ class User:
 class Song:
     def __init__(self, songID, artists, lyrics, name, obfEasy, obfMedium, obfHard):
         self.id = songID
-        self.artists = artists
+        self.artists = " & ".join(artists)
         self.lyrics = lyrics
         self.name = name
-        self.obfPatterns = json.dumps(
-            {"easy": obfEasy, "medium": obfMedium, "hard": obfHard})
-
-    def json(self):
-        return ({
-            "id": self.id,
-            "artists": self.artists,
-            "name": self.name,
-            "lyrics": self.lyrics,
-            "obfPatterns": self.obfPatterns
-        })
+        self.obfPatterns = {"easy": obfEasy,
+                            "medium": obfMedium, "hard": obfHard}
 
     def tuple(self):
-        return ((self.id, self.artists, self.lyrics, self.name, self.obfPatterns))
+        return (self.id, json.dumps({"artists": self.artists, "lyrics": self.lyrics, "name": self.name, "obfPatterns": self.obfPatterns}))
 
 
 class Lyridact_DB:
@@ -185,10 +185,7 @@ class Lyridact_DB:
             db = self.connect()
             create_song_table = """CREATE TABLE songs (
                 id INTEGER,
-                artists TEXT,
-                lyrics TEXT,
-                name TEXT,
-                obfPatterns TEXT
+                songData TEXT
             );"""
             create_leaderboard_table = """CREATE TABLE leaderboard (
                 cookie TEXT,
@@ -212,7 +209,8 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def downloadSongs(self):
+    def downloadSongs(self, subset):
+        # subset allows you to download only subset number of songs
 
         def getSpotifyAccessToken():
             url = "https://accounts.spotify.com/api/token"
@@ -253,17 +251,19 @@ class Lyridact_DB:
                         singerName = artist["name"]
                         singers.append(singerName)
                     name = item["track"]["name"]
-                    topFifty.append((name, singers))
+                    if name and singers:
+                        topFifty.append((name, singers))
 
                 return topFifty
             else:
                 return None
 
         def create_song(songLyrics, songName, songArtists, songID):
-            easy = obfLyrics(songLyrics, songName, songArtists, .2)
-            medium = obfLyrics(songLyrics, songName, songArtists, .5)
-            hard = obfLyrics(songLyrics, songName, songArtists, .7)
-            return (Song(songID, songArtists, songLyrics, songName, easy, medium, hard))
+            easy, clean_lyrics = obfLyrics(
+                songLyrics, songName, songArtists, .2)
+            medium = obfLyrics(songLyrics, songName, songArtists, .5)[0]
+            hard = obfLyrics(songLyrics, songName, songArtists, .7)[0]
+            return (Song(songID, songArtists, clean_lyrics, songName, easy, medium, hard))
 
         def getLyrics(songName, songArtists):
             regex = r'[^a-zA-Z0-9\s]'
@@ -279,13 +279,19 @@ class Lyridact_DB:
             }
             res = requests.get(url, headers=headers)
             data = json.loads(res.text)
-            song_id = data["response"]["hits"][0]["result"]["id"]
+            try:
+                song_id = data["response"]["hits"][0]["result"]["id"]
+            except:
+                return False, False
             genius = lyricsgenius.Genius(access_token)
             lyrics = genius.lyrics(int(song_id))
 
             start = lyrics.find('[')
+            if start == -1:
+                print("These lyrics aren't properly formatted, skipping")
+                return False, False
             clean_lyrics = lyrics[start:-7]
-            print(repr(clean_lyrics))
+
             print(repr(songName))
             print(repr(songArtists))
 
@@ -296,21 +302,32 @@ class Lyridact_DB:
             cursor = db.cursor()
             songArray = []
             songNames = getTop50()
+            counter = 0
             for song in songNames:
-                name = song[0]
-                artists = song[1]
-                lyrics, id = getLyrics(name, artists)
-                artist = ' & '.join(artists)
-                newSong = create_song(lyrics, name, artist, id)
-                songArray.append(newSong.tuple())
+                if song:
+                    counter += 1
+                    if counter > subset:
+                        break
+
+                    name = song[0]
+                    artists = song[1]
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        lyrics, id = getLyrics(name, artists)
+                    if lyrics == False and id == False:
+                        continue
+
+                    newSong = create_song(lyrics, name, artists, id)
+                    songArray.append(newSong.tuple())
 
             cursor.executemany(
-                "INSERT INTO songs VALUES (?,?,?,?,?)", songArray)
+                "INSERT INTO songs VALUES (?,?)", songArray)
             db.commit()
 
             return True
-        except:
+        except Exception as e:
             print("Something went wrong with downloading songs.")
+            print(e)
             return False
 
         finally:
@@ -455,6 +472,3 @@ class Lyridact_DB:
             except:
                 return False
         return False
-
-
-
