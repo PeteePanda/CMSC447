@@ -381,14 +381,13 @@ class Lyridact_DB:
 
     def updateUser(self, cookie, wordlist, level):
         user = self.getUserFromCookie(cookie)
-        person = json.loads(user[0][0])
-        person['wordsUsed'] = wordlist
-        person['levelsUnlocked'] = level
+        user['wordsUsed'] = wordlist
+        user['levelsUnlocked'] = level
 
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"UPDATE users SET userData = '{json.dumps(person)}' WHERE cookie = '{cookie}';"
+            query = f"UPDATE users SET userData = '{json.dumps(user)}' WHERE cookie = '{cookie}';"
             cursor.execute(query)
             db.commit()
             return True
