@@ -34,15 +34,15 @@ def homePage():
     cookie = request.cookies.get('cookie')
     user = database.getUserFromCookie(cookie)
     if not user:
-        resp = make_response(render_template("index.html", wordlist=[], level=1))
+        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1))
         newCookie = generateCookie()
         resp.set_cookie('cookie', newCookie)
         database.addNewUser(newCookie)
         return resp
     else:
-        print(user)
-        person = json.loads(user[0][0])
-        return render_template("index.html", wordlist=person['wordsUsed'], currentLevel=person['levelsUnlocked'])
+        
+        
+        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'])
 
         
    
