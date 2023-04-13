@@ -1,4 +1,3 @@
-
 // Get the <tbody>, button and input field elements
 const tableBody = document.querySelector('table tbody');
 const addGuessBtn = document.querySelector('#guess-btn');
@@ -16,24 +15,10 @@ addGuessBtn.addEventListener('click', function() {
     else{
         // Add word to already guessed words
         usedGuesses.push(guessString);
-
-        // Count the number of hits in the song and fill in the lyrics (brokeSong array)
-        let wordCount = 0;
-        for (i in finishedSong) {
-            if(guessString == finishedSong[i].toLowerCase()){
-                wordCount+=1;
-                brokeSong[i] = finishedSong[i];
-            }
-        }
-
-        // If their guess is in the song name, increment wordCount and fill in title
-        for (i in songName) {
-            if(guessString == songName[i].toLowerCase()){
-                wordCount+=1;
-                songBlank[i] = songName[i];
-            }
-        }
         
+        // Check the guess with the puzzle
+        let wordCount = processGuess(guessString);
+
         // Send updated guess data to DB
         sendUserData(usedGuesses);
 
@@ -50,6 +35,27 @@ addGuessBtn.addEventListener('click', function() {
     // Clear the input field
     guessInput.value = "";
 });
+
+// Tries to solve the puzzle using the valid guess and returns how frequent it shows up in the puzzle
+function processGuess(guessString){
+       // Count the number of hits in the song and fill in the lyrics (brokeSong array)
+       let wordCount = 0;
+       for (i in finishedSong) {
+           if(guessString == finishedSong[i].toLowerCase()){
+               wordCount+=1;
+               brokeSong[i] = finishedSong[i];
+           }
+       }
+
+       // If their guess is in the song name, increment wordCount and fill in title
+       for (i in songName) {
+           if(guessString == songName[i].toLowerCase()){
+               wordCount+=1;
+               songBlank[i] = songName[i];
+           }
+       }
+       return wordCount;
+}
 
 // Clear out guesses table
 function clearTable(){
@@ -195,9 +201,8 @@ function roundWin(){
         }
         else if(level >= 3){
             popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
-            popupButton.innerHTML = "Replay Level 3";
+            popupButton.innerHTML = "See you tomorrow!";
             level = 3; // Reset level to 3
-            // TEAM DECIDES WHAT TO DO AFTER HARD LEVEL IS BEAT
         }
         popupText.innerHTML = "Here's the leaderboard info in table format";
         displayLeaderboard(level);
@@ -248,14 +253,56 @@ function listInvalids(){
     }
 }
 
-// Close popup ; initiates game start
+// Close popup ; initiates a game start
 function closePopup(){
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
-    updatePage(); // Update the page with new song data
-    usedGuesses = []; // Clear used guesses list
-    clearTable(); // Empty the table
+    if(sessionReload == false){
+        reloadCookies();
+        sessionReload = true;
+        updatePage(); // Update the page with new song data
+        roundWin(); // Check if user already won this round
+    }
+    else{
+        usedGuesses = []; // Clear used guesses list
+        if(level <= 3){
+            clearTable(); // Empty the table
+        }
+        updatePage(); // Update the page with new song data
+    }
     listInvalids(); // Populate a list of all invalid guesses
+}
+
+// RELOAD COOKIES
+function reloadCookies(){
+    // If there are guesses from a previous session or they aren't on the first level
+    console.log(usedGuesses);
+    console.log(level);
+    if(usedGuesses.length != 0 || level != 1){
+        if(level == 2){
+            songName = songName2;
+            songBlank = songBlank2;
+            songArtist = songArtist2;
+            percentDif = percentDif2;
+            finishedSong = finishedSong2;
+            brokeSong = brokeSong2;
+        }
+        else if(level == 3){
+            songName = songName3;
+            songBlank = songBlank3;
+            songArtist = songArtist3;
+            percentDif = percentDif3;
+            finishedSong = finishedSong3;
+            brokeSong = brokeSong3;
+        }
+        for(i in usedGuesses){
+            let guessString = usedGuesses[i];
+            // Check the guess with the puzzle
+            let wordCount = processGuess(guessString);
+            // Update table with guess
+            modifyTable(guessString,wordCount);
+        }
+    }
 }
 
 // SAMPLE DATA BELOW FOR HARD CODED TESTING
@@ -278,16 +325,11 @@ let songBlank3 = ["____", "___", "___", "___", "___"];
 let songArtist3 = "Bruno Mars";
 let percentDif3 = "80%";
 let finishedSong3 =  ['her', 'eyes', 'her', 'eyes', 'make', 'the', 'stars', 'look', 'like', "they're", 'not', 'shining'];
-let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', 'the', '_____', 'look', '____', "they're", 'not', '_______'];
+let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', '___', '_____', 'look', '____', "they're", 'not', '_______'];
 
 
 // START INITIAL STARTUP CODE
 // DO NOT MODIFY
-
-// FRANCO TESTING - DO NOT INCLUDE IN MERGE
-let usedGuesses = [];
-let level = 1;
-// FRANCO TESTING - DO NOT INCLUDE IN MERGE
 
 
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
@@ -295,5 +337,6 @@ popup.classList.add("open-popup");
 const overlay = document.querySelector('.overlay');
 overlay.style.display = 'block';
 let invalidWords = [];
+let sessionReload = false; // Denotes if a session reload has happened already
 
 // END INITIAL STARTUP CODE

@@ -50,10 +50,14 @@
             </div>
 		</div>
 	</div>
+    <script>
+        let usedGuesses = [];
+        let level = 1;
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}" type="text/javascript"></script>
-    <!-- <script>
-        let level = {{ currentLevel }};
-        let usedGuesses = {{ wordlist | tojson }}; 
-    </script> -->
+    <script>
+        usedGuesses = {{ wordlist | tojson }}; 
+        level = {{ currentLevel }};
+    </script>
 </body>
 </html>
