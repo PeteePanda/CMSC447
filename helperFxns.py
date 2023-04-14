@@ -285,19 +285,20 @@ class Lyridact_DB:
                 try:
                     song_id = data["response"]["hits"][0]["result"]["id"]
                 except:
-                    return False, False
+                    return False, False, False, False
                 genius = lyricsgenius.Genius(access_token)
                 lyrics = genius.lyrics(int(song_id))
 
                 start = lyrics.find('[')
                 if start == -1:
                     print("These lyrics aren't properly formatted, skipping")
-                    return False, False
+                    return False, False, False, False
                 clean_lyrics = lyrics[start:-7]
 
                 print(repr(songName))
                 print(repr(songArtists))
-                songArray[index] = (clean_lyrics, int(song_id))
+                if(songName and songArtists and clean_lyrics and song_id):
+                    songArray[index] = (songName, songArtists, clean_lyrics, int(song_id))
 
             
 
@@ -308,7 +309,7 @@ class Lyridact_DB:
             songNames = getTop50()
             counter = 0
             # Vars for multithreading
-            downloadArray = [(False, False)] * len(songNames)
+            downloadArray = [(False, False, False, False)] * len(songNames)
             threads = [None] * len(songNames)
             for song in songNames:
                 if song:
@@ -327,8 +328,8 @@ class Lyridact_DB:
             for i in range(len(threads)):
                 threads[i].join()
 
-            for lyrics, id in downloadArray:
-                if lyrics == False and id == False:
+            for name, artists, lyrics, id in downloadArray:
+                if lyrics == False or id == False or name == False or artists == False:
                     continue
 
                 newSong = create_song(lyrics, name, artists, id)
