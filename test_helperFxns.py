@@ -1,5 +1,6 @@
 import unittest
 from helperFxns import *
+import datetime
 
 
 class TestUtils(unittest.TestCase):
@@ -31,6 +32,14 @@ class TestUtils(unittest.TestCase):
         db = Lyridact_DB("test_data.db")
         db.reset()
         self.assertTrue(db.downloadSongs(100))
+    
+    def test_sendTodaySongs(self):
+        db = Lyridact_DB("test_data.db")
+        for day in range(100):
+            today = datetime.datetime.today()
+            test = (today + datetime.timedelta(days=day)).strftime('%Y-%m-%d')
+            songs = db.sendTodaySongs(test)
+            self.assertTrue(songs)
 
 if __name__ == "__main__":
     unittest.main()

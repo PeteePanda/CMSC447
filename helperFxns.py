@@ -360,14 +360,27 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
+    
+    def getSongTableSize(self):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            query = f"SELECT COUNT(*) FROM songs"
+            cursor.execute(query)
+            row = cursor.fetchall()
+            return int(row[0][0])
+        except:
+            return False
+        finally:
+            db.close()
 
-    def sendTodaySongs(self):
-        today = datetime.today().strftime('%Y-%m-%d')
+    def sendTodaySongs(self, today):
         random.seed(today)
         indexes = []
         songs = []
+        num_songs = self.getSongTableSize()
         for _ in range(3):
-            indexes.append(random.randint(1, 50))
+            indexes.append(random.randint(1, num_songs))
         for index in indexes:
             song = self.getSongFromDB(index)
             if song == False:

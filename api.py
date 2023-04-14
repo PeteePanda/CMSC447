@@ -16,7 +16,8 @@ def api_downloadSongs():
 
 @app.route('/api/getDailySongs')
 def api_getSongs():
-    return(jsonify(database.sendTodaySongs()))
+    today = datetime.today().strftime('%Y-%m-%d')
+    return(jsonify(database.sendTodaySongs(today)))
 
 @app.route('/api/updateUser', methods=['POST'])
 def api_updateUser():
