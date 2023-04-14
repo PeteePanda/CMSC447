@@ -11,6 +11,7 @@ import string
 import numpy as np
 import pandas as pd
 import warnings
+import threading
 
 load_dotenv()
 
@@ -265,37 +266,40 @@ class Lyridact_DB:
             hard = obfLyrics(songLyrics, songName, songArtists, .7)[0]
             return (Song(songID, songArtists, clean_lyrics, songName, easy, medium, hard))
 
-        def getLyrics(songName, songArtists):
-            regex = r'[^a-zA-Z0-9\s]'
-            name = re.sub(regex, '', songName.lower())
-            artist = re.sub(regex, '', songArtists[0].lower())
-            query = f'{name} {artist}'
-            url = f"https://api.genius.com/search?q=" + \
-                re.sub(" ", "%20", query)
+        def getLyrics(songName, songArtists, songArray, index):
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                regex = r'[^a-zA-Z0-9\s]'
+                name = re.sub(regex, '', songName.lower())
+                artist = re.sub(regex, '', songArtists[0].lower())
+                query = f'{name} {artist}'
+                url = f"https://api.genius.com/search?q=" + \
+                    re.sub(" ", "%20", query)
 
-            access_token = os.environ.get("GENIUS_API_KEY")
-            headers = {
-                'Authorization': "Bearer " + access_token
-            }
-            res = requests.get(url, headers=headers)
-            data = json.loads(res.text)
-            try:
-                song_id = data["response"]["hits"][0]["result"]["id"]
-            except:
-                return False, False
-            genius = lyricsgenius.Genius(access_token)
-            lyrics = genius.lyrics(int(song_id))
+                access_token = os.environ.get("GENIUS_API_KEY")
+                headers = {
+                    'Authorization': "Bearer " + access_token
+                }
+                res = requests.get(url, headers=headers)
+                data = json.loads(res.text)
+                try:
+                    song_id = data["response"]["hits"][0]["result"]["id"]
+                except:
+                    return False, False
+                genius = lyricsgenius.Genius(access_token)
+                lyrics = genius.lyrics(int(song_id))
 
-            start = lyrics.find('[')
-            if start == -1:
-                print("These lyrics aren't properly formatted, skipping")
-                return False, False
-            clean_lyrics = lyrics[start:-7]
+                start = lyrics.find('[')
+                if start == -1:
+                    print("These lyrics aren't properly formatted, skipping")
+                    return False, False
+                clean_lyrics = lyrics[start:-7]
 
-            print(repr(songName))
-            print(repr(songArtists))
+                print(repr(songName))
+                print(repr(songArtists))
+                songArray[index] = (clean_lyrics, int(song_id))
 
-            return clean_lyrics, int(song_id)
+            
 
         try:
             db = self.connect()
@@ -303,6 +307,9 @@ class Lyridact_DB:
             songArray = []
             songNames = getTop50()
             counter = 0
+            # Vars for multithreading
+            downloadArray = [(False, False)] * len(songNames)
+            threads = [None] * len(songNames)
             for song in songNames:
                 if song:
                     counter += 1
@@ -311,14 +318,21 @@ class Lyridact_DB:
 
                     name = song[0]
                     artists = song[1]
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        lyrics, id = getLyrics(name, artists)
-                    if lyrics == False and id == False:
-                        continue
+                    
+                    # Multithreading
+                    threads[counter - 1] = threading.Thread(target=getLyrics, args=(name, artists, downloadArray, counter - 1))
+                    threads[counter - 1].start()
+            
+            # Wait for threads to finish
+            for i in range(len(threads)):
+                threads[i].join()
 
-                    newSong = create_song(lyrics, name, artists, id)
-                    songArray.append(newSong.tuple())
+            for lyrics, id in downloadArray:
+                if lyrics == False and id == False:
+                    continue
+
+                newSong = create_song(lyrics, name, artists, id)
+                songArray.append(newSong.tuple())
 
             cursor.executemany(
                 "INSERT INTO songs VALUES (?,?)", songArray)
