@@ -28,13 +28,21 @@ def api_updateUser():
     database.updateUser(cookie, wordList, level)
     return ('', 204)
 
-@app.route('/api/getLeaderboard', methods=['GET'])
+@app.route('/api/getLB', methods=['GET'])
 def api_getLeaderboard():
     lb = database.getLeaderboard()
     if lb:
         return(jsonify(lb))
     else:
         return(jsonify([]))
+
+@app.route('/api/addLBScore', methods=['POST'])
+def api_addLBScore():
+    cookie = request.cookies.get('cookie')
+    content = request.get_json()
+    points = content['points']
+    database.addScoreToLeaderboard(points, cookie)
+    return ('', 204)
 
 @app.route('/', methods=['GET'])
 def homePage():
