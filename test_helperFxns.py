@@ -34,6 +34,13 @@ class TestUtils(unittest.TestCase):
         db.reset()
         self.assertTrue(db.downloadSongs(100))
     
+    def test_getSongTableSize(self):
+        db = Lyridact_DB("test_data.db")
+        size = db.getSongTableSize()
+        print("Table size: ", size)
+        self.assertTrue(size > 0)
+        self.assertTrue (type(size) == int)
+    
     def test_sendTodaySongs(self):
         db = Lyridact_DB("test_data.db")
         for day in range(100):
