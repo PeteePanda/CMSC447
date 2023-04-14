@@ -162,8 +162,8 @@ class Song:
         self.artists = " & ".join(artists)
         self.lyrics = lyrics
         self.name = name
-        self.obfPatterns = {"easy": obfEasy,
-                            "medium": obfMedium, "hard": obfHard}
+        self.obfPatterns = {"easyOBF": obfEasy,
+                            "mediumOBF": obfMedium, "hardOBF": obfHard}
 
     def tuple(self):
         return (self.id, json.dumps({"artists": self.artists, "lyrics": self.lyrics, "name": self.name, "obfPatterns": self.obfPatterns}))
