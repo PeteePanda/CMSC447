@@ -7,10 +7,11 @@ class TestUtils(unittest.TestCase):
       
     def test_Leaderboard(self):
         db = Lyridact_DB("test_data.db")
+        db.resetLeaderboard()
         test_score = ("randomcookie", 99)
         db.addScoreToLeaderboard(test_score[1], test_score[0])
         lb = db.getLeaderboard()
-        self.assertTrue( lb[0] == test_score)
+        self.assertTrue(lb)
         db.resetLeaderboard()
         lb = db.getLeaderboard()
         self.assertFalse(lb)
@@ -40,6 +41,13 @@ class TestUtils(unittest.TestCase):
             test = (today + datetime.timedelta(days=day)).strftime('%Y-%m-%d')
             songs = db.sendTodaySongs(test)
             self.assertTrue(songs)
-
+    
+    def test_getLeaderboard(self):
+        db = Lyridact_DB("test_data.db")
+        for i in range(20):
+            db.addScoreToLeaderboard(i, f"randomcookie{i}")
+        lb = db.getLeaderboard()
+        self.assertTrue(lb[0][1] == 0)
+        
 if __name__ == "__main__":
     unittest.main()

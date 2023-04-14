@@ -443,11 +443,12 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"SELECT * FROM leaderboard ORDER BY points DESC"
+            query = "SELECT * FROM leaderboard ORDER BY points ASC"
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                return data
+                return_data = [[cookie, points] for cookie, points in data]
+                return return_data
             else:
                 return False
         except:
