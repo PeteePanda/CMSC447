@@ -27,7 +27,14 @@ def api_updateUser():
     level = content['level']
     database.updateUser(cookie, wordList, level)
     return ('', 204)
-    
+
+@app.route('/api/getLeaderboard', methods=['GET'])
+def api_getLeaderboard():
+    lb = database.getLeaderboard()
+    if lb:
+        return(jsonify(lb))
+    else:
+        return(jsonify([]))
 
 @app.route('/', methods=['GET'])
 def homePage():
