@@ -4,6 +4,7 @@
 	<title>Lyridact - Guess the Song!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- <audio id="myAudio" src="/static/victory.mp3"></audio> -->
 </head>
 <body>
 	<div class="wrapper">
@@ -16,6 +17,19 @@
                 <br>The game has three levels, and you can only progress to the next level after beating the previous one.
                 <br><br>Goodluck!
             </p>
+            <div id = "leaderboard">
+                <h3>Top 5 Players Today</h3>
+                <table id = "leaderboard-table">
+                    <thead id = "leaderboard-table-header">
+                        <tr>
+                            <th>Player</th>
+                            <th># Guesses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
             <button type="button" onclick="closePopup()" id="popup-button">Play</button>
         </div>
 		<div class="title">Lyridact - Guess the Song!</div>
