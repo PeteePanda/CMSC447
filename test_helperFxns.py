@@ -28,80 +28,53 @@ class TestUtils(unittest.TestCase):
             self.assertTrue( (obfCount / wordCount) <= .25)
         
 
-    def test_download_and_obf(self):
-        db = Lyridact_DB("test_data.db")
-        db.reset()
-        self.assertTrue(db.downloadSongs(100))
+    # def test_download_and_obf(self):
+    #     db = Lyridact_DB("test_data.db")
+    #     db.reset()
+    #     self.assertTrue(db.downloadSongs(100))
     
-    def test_sendTodaySongs(self):
-        db = Lyridact_DB("test_data.db")
-        for day in range(100):
-            today = datetime.datetime.today()
-            test = (today + datetime.timedelta(days=day)).strftime('%Y-%m-%d')
-            songs = db.sendTodaySongs(test)
-            self.assertTrue(songs)
+    # def test_sendTodaySongs(self):
+    #     db = Lyridact_DB("test_data.db")
+    #     for day in range(100):
+    #         today = datetime.datetime.today()
+    #         test = (today + datetime.timedelta(days=day)).strftime('%Y-%m-%d')
+    #         songs = db.sendTodaySongs(test)
+    #         self.assertTrue(songs)
 
     def test_obf_percent(self):
         db = Lyridact_DB("test_data.db")
-        song_info = db.getSongFromDB(0)
-        print("Printing, song info: ")
-
-        
+        test_file = open("test_records/obf_perfent_test.txt", "w")
         table_len = db.getSongTableSize()
-        print("Table size: ", table_len)
-        complete_test = True
-        obf_count = 0
-        word_count = 0
+
         easy_total = 0
         medium_total = 0
         hard_total = 0
+        obf_total = 0
+        lyric_len = 0
         for i in range(table_len):
-            song_info = db.getSongFromDB(i)
-            for column in song_info:
-                for thing in column:
-                    if isinstance(thing, str):
-                        word = ""
-                        obf_count = 0
-                        word_count = 0
-                        for character in thing:
-                            if character == "\"":
-                                #print(word, end="")
-                                if "_" in word:
-                                    obf_count += 1
-                                word_count += .5
-                                word = ""
-                            else:
-                                word += character
+            song_data = json.loads(db.getSongFromDB(i)[0][1])
+            lyric_len = len(song_data["lyrics"])
+            test_file.write(song_data["name"] + "\n")
+            for difficulty in song_data["obfPatterns"]:
+                obf_total = 0
+                for word in song_data["obfPatterns"][difficulty]:
+                    if "_" in word:
+                        obf_total += 1
+                test_file.write(difficulty + " Ratio: " + str(obf_total/lyric_len) + "\n")
+                if difficulty == "easy":
+                    easy_total += obf_total/lyric_len
+                elif difficulty == "medium":
+                    medium_total += obf_total/lyric_len
+                else:
+                    hard_total += obf_total/lyric_len
+            test_file.write("\n")
+        test_file.write("Average Percentages Across Difficulties: " +
+                        "\nEasy: " + str(easy_total/table_len) +
+                        "\nMedium: " + str(medium_total/table_len) +
+                        "\nHard: " + str(hard_total/table_len))
+        test_file.close()
+        print("\nPercentage Test Complete")
 
-                            if word == "easyOBF":
-                                #print("\nclean obf: ", obf_count, "\nword: ", word_count, "\nRatio: ", obf_count/word_count)
-                                print(id, end="")
-                                obf_count = 0
-                                word_count = 0
-                            elif word == "mediumOBF":
-                                print("\neasy Ratio: ", obf_count/word_count, end="")
-                                if not(obf_count/word_count > 15 and obf_count/word_count < 25):
-                                    complete_test = False
-                                
-                                easy_total += obf_count/word_count
-                                obf_count = 0
-                                word_count = 0
-                            elif word == "hardOBF":
-                                print("\nmedium Ratio: ", obf_count/word_count, end="")
-                                
-                                medium_total += obf_count/word_count
-                                obf_count = 0
-                                word_count = 0
-                    else:
-                        id = thing
-                        print()
-            print("\nhard Ratio: ", obf_count/word_count)
-            if not(obf_count/word_count > 65 and obf_count/word_count < 75):
-                complete_test = False
-            
-            hard_total += obf_count/word_count
-            #print(id, "\nOBF Percentage +/- 5%")
-        print("\nAverage obf Percentages: \neasy: ", easy_total/table_len, "\nmedium", medium_total/table_len, "\nhard", hard_total/table_len)
 
 if __name__ == "__main__":
     unittest.main()

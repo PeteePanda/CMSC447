@@ -162,8 +162,8 @@ class Song:
         self.artists = " & ".join(artists)
         self.lyrics = lyrics
         self.name = name
-        self.obfPatterns = {"easyOBF": obfEasy,
-                            "mediumOBF": obfMedium, "hardOBF": obfHard}
+        self.obfPatterns = {"easy": obfEasy,
+                            "medium": obfMedium, "hard": obfHard}
 
     def tuple(self):
         return (self.id, json.dumps({"artists": self.artists, "lyrics": self.lyrics, "name": self.name, "obfPatterns": self.obfPatterns}))
@@ -263,7 +263,7 @@ class Lyridact_DB:
             easy, clean_lyrics = obfLyrics(
                 songLyrics, songName, songArtists, .2)
             medium = obfLyrics(songLyrics, songName, songArtists, .5)[0]
-            hard = obfLyrics(songLyrics, songName, songArtists, .7)[0]
+            hard = obfLyrics(songLyrics, songName, songArtists, .8)[0]
             return (Song(songID, songArtists, clean_lyrics, songName, easy, medium, hard))
 
         def getLyrics(songName, songArtists, songArray, index):
