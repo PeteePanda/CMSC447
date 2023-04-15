@@ -4,7 +4,6 @@ html, body {
 	padding: 0;
 }
 
-
 .overlay {
     position: fixed;
     top: 0;
@@ -57,6 +56,18 @@ html, body {
 	flex-direction: column;
 	height: 100%;
 }
+
+#leaderboard {
+    display:none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* #leaderboard-table-header{
+    border-top-left-radius: 40px;
+    border-top-right-radius: 40px;  
+} */
+
 
 .title {
 	background-color: #2F3136;
