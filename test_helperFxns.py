@@ -7,13 +7,14 @@ class TestUtils(unittest.TestCase):
       
     def test_Leaderboard(self):
         db = Lyridact_DB("test_data.db")
-        db.resetLeaderboard()
+        db.resetLeaderboard(1)
         test_score = ("randomcookie", 99)
-        db.addScoreToLeaderboard(test_score[1], test_score[0])
-        lb = db.getLeaderboard()
-        self.assertTrue(lb)
-        db.resetLeaderboard()
-        lb = db.getLeaderboard()
+        db.addScoreToLeaderboard(test_score[1], test_score[0], 1)
+        lb = db.getLeaderboard(1)
+        self.assertTrue(lb[0][1] == 99)
+        db.resetLeaderboard(1)
+        lb = db.getLeaderboard(1)
+        print("LB: ", lb)
         self.assertFalse(lb)
         
     def test_obf(self):
@@ -52,8 +53,8 @@ class TestUtils(unittest.TestCase):
     def test_getLeaderboard(self):
         db = Lyridact_DB("test_data.db")
         for i in range(20):
-            db.addScoreToLeaderboard(i, f"randomcookie{i}")
-        lb = db.getLeaderboard()
+            db.addScoreToLeaderboard(i, f"randomcookie{i}", 1)
+        lb = db.getLeaderboard(1)
         self.assertTrue(lb[0][1] == 0)
         
 if __name__ == "__main__":
