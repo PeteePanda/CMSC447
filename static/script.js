@@ -147,7 +147,7 @@ function updatePage() {
 }
 
 // Check round win at end of guess
-function roundWin(){
+async function roundWin(){
     let titleFinished = true;
     // Check if title was guessed first (win condition)
     for(i in songName){
@@ -205,6 +205,7 @@ function roundWin(){
             level = 3; // Reset level to 3
         }
         popupText.innerHTML = "You placed [INSERT RANK HERE].";
+        await getLeaderboardData(level);
         displayLeaderboard(level);
         // playAudio();
         level += 1; // Progress to next level
@@ -236,7 +237,7 @@ function displayLeaderboard(level){
     const tableBody = document.getElementById("leaderboard-table").querySelector('tbody');
 
     // Add everybody to the leaderboard
-    for(i in leaderboard){
+    for(let i = 0; i < leaderboard.length; i++){
         // Get user and their guesses
         let userName = leaderboard[i][0];
         let userGuesses = leaderboard[i][1];
@@ -287,6 +288,28 @@ function sendUserData(usedGuesses){
     console.log(usedGuesses);
     console.log(level);
 }
+
+// Gets the leaderboard data from the DB
+async function getLeaderboardData(level){
+    const req = await fetch('/api/getLB', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({"level": level})
+    });
+    const reqData = await req.json();
+    console.log("Leaderboard Data Received");
+    if (level == 1){
+        leaderboard1 = reqData;
+    }
+    else if (level == 2){
+        leaderboard2 = reqData;
+    } else if (level == 3){
+        leaderboard3 = reqData;
+    }
+}
+
 
 // Creates a list of all invalid words the user cannot guess for each game.
 // This means words already in the brokeSong. They do not count as guesses.

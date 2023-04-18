@@ -465,7 +465,7 @@ class Lyridact_DB:
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                return_data = [[cookie, points] for cookie, points in data]
+                return_data = [[cookie, str(points)] for cookie, points in data]
                 return return_data
             else:
                 return False
