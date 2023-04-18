@@ -223,7 +223,7 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def downloadSongs(self, subset):
+    def downloadSongs(self, subset=100):
         # subset allows you to download only subset number of songs
 
         def getSpotifyAccessToken():
@@ -393,16 +393,47 @@ class Lyridact_DB:
         indexes = []
         songs = []
         num_songs = self.getSongTableSize()
+        if num_songs == 0:
+            print("Song table is empty")
+            return False
         for _ in range(3):
             indexes.append(random.randint(1, num_songs))
-        for index in indexes:
-            song = self.getSongFromDB(index)
-            if song == False:
-                return False
-            else:
-                songs.append(self.getSongFromDB(index))
 
-        return songs
+        easySong = self.getSongFromDB(indexes[0])
+        mediumSong = self.getSongFromDB(indexes[1])
+        hardSong = self.getSongFromDB(indexes[2])
+
+        if easySong == False or mediumSong == False or hardSong == False:
+            return False
+        
+        easyData = json.loads(easySong[0][1])
+        mediumData = json.loads(mediumSong[0][1])
+        hardData = json.loads(hardSong[0][1])
+
+        easyJSON = {
+            "level": 1,
+            "artists": easyData["artists"],
+            "lyrics": easyData["lyrics"],
+            "name": easyData["name"],
+            "obfLyrics": easyData["obfPatterns"]["easy"]
+        }
+        mediumJSON = {
+            "level": 2,
+            "artists": mediumData["artists"],
+            "lyrics": mediumData["lyrics"],
+            "name": mediumData["name"],
+            "obfLyrics": mediumData["obfPatterns"]["medium"]
+        }
+
+        hardJSON = {
+            "level": 3,
+            "artists": hardData["artists"],
+            "lyrics": hardData["lyrics"],
+            "name": hardData["name"],
+            "obfLyrics": hardData["obfPatterns"]["hard"]
+        }
+
+        return [easyJSON, mediumJSON, hardJSON]
 
     def getUserFromCookie(self, cookie):
         try:
