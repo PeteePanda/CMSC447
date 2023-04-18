@@ -310,6 +310,23 @@ async function getLeaderboardData(level){
     }
 }
 
+// Get song data from DB
+async function getSongData(){
+    const req = await fetch('/api/getDailySongs', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+    const reqData = await req.json();
+    console.log("Song Data Received");
+    songName = [reqData[0]['name']];
+    songArtist = reqData[0]['artist'];
+    finishedSong = reqData[0]['lyrics']
+    brokeSong = reqData[0]['obfLyrics']
+
+}
+
 
 // Creates a list of all invalid words the user cannot guess for each game.
 // This means words already in the brokeSong. They do not count as guesses.
@@ -404,6 +421,7 @@ let leaderboard3 = [['user11', 'numGuess11'], ['user12', 'numGuess12'], ['user13
 
 // START INITIAL STARTUP CODE
 // DO NOT MODIFY
+getSongData();
 
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
 popup.classList.add("open-popup"); 
