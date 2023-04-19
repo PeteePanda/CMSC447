@@ -412,14 +412,14 @@ class Lyridact_DB:
 
         easyJSON = {
             "level": 1,
-            "artists": easyData["artists"],
+            "artist": easyData["artists"],
             "lyrics": easyData["lyrics"],
             "name": easyData["name"],
             "obfLyrics": easyData["obfPatterns"]["easy"]
         }
         mediumJSON = {
             "level": 2,
-            "artists": mediumData["artists"],
+            "artist": mediumData["artists"],
             "lyrics": mediumData["lyrics"],
             "name": mediumData["name"],
             "obfLyrics": mediumData["obfPatterns"]["medium"]
@@ -427,7 +427,7 @@ class Lyridact_DB:
 
         hardJSON = {
             "level": 3,
-            "artists": hardData["artists"],
+            "artist": hardData["artists"],
             "lyrics": hardData["lyrics"],
             "name": hardData["name"],
             "obfLyrics": hardData["obfPatterns"]["hard"]
