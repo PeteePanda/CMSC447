@@ -382,7 +382,6 @@ let leaderboard3 = [['user11', 'numGuess11'], ['user12', 'numGuess12'], ['user13
 // START INITIAL STARTUP CODE
 // DO NOT MODIFY
 
-
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
 popup.classList.add("open-popup"); 
 const overlay = document.querySelector('.overlay');
