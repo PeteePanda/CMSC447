@@ -320,13 +320,13 @@ async function getSongData(){
     });
     const reqData = await req.json();
     console.log("Song Data Received");
-    songName = [reqData[0]['name']];
+    songName = reqData[0]['name'].split(" ");
     console.log(songName);
     songArtist = reqData[0]['artist'];
     console.log(songArtist);
     finishedSong = reqData[0]['lyrics'];
-    console.log(finishedSong);
     brokeSong = reqData[0]['obfLyrics'];
+    console.log(finishedSong);
     console.log(brokeSong);
 
 
