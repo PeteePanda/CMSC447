@@ -109,7 +109,7 @@ function updatePage() {
             title.innerHTML += " ";
         }
 
-         // If the first index of the word is a blank, display a blank char box for each letter.
+         // If the first index of the word is a blank (accounts for words that start with ' (like 'bout)), display a blank char box for each letter.
          // Otherwise fill in the title if it was guessed.
         if((songBlank[i])[0] == '_'){
             for(char in songBlank[i]){
@@ -133,7 +133,7 @@ function updatePage() {
         }
         else{
             // If the first index of that character is a blank, the word hasn't been solved yet, and fill page with blanks
-            if((brokeSong[i])[0] == "_"){
+            if(((brokeSong[i])[0] == "_") || ((brokeSong[i])[0] == "'" && (brokeSong[i])[1] == '_')){
                 for(char in brokeSong[i]){
                     lyrics.innerHTML += String.fromCharCode(9608);
                 }
@@ -147,7 +147,7 @@ function updatePage() {
 }
 
 // Check round win at end of guess
-function roundWin(){
+async function roundWin(){
     let titleFinished = true;
     // Check if title was guessed first (win condition)
     for(i in songName){
@@ -185,7 +185,6 @@ function roundWin(){
             songName = songName2;
             songBlank = songBlank2;
             songArtist = songArtist2;
-            percentDif = percentDif2;
             finishedSong = finishedSong2;
             brokeSong = brokeSong2;
         }
@@ -195,7 +194,6 @@ function roundWin(){
             songName = songName3;
             songBlank = songBlank3;
             songArtist = songArtist3;
-            percentDif = percentDif3;
             finishedSong = finishedSong3;
             brokeSong = brokeSong3;
         }
@@ -204,6 +202,7 @@ function roundWin(){
             popupButton.innerHTML = "See you tomorrow!";
             level = 3; // Reset level to 3
         }
+        await getLeaderboardData(level);
         popupText.innerHTML = "You placed [INSERT RANK HERE].";
         displayLeaderboard(level);
         // playAudio();
@@ -236,7 +235,7 @@ function displayLeaderboard(level){
     const tableBody = document.getElementById("leaderboard-table").querySelector('tbody');
 
     // Add everybody to the leaderboard
-    for(i in leaderboard){
+    for(let i = 0; i < leaderboard.length; i++){
         // Get user and their guesses
         let userName = leaderboard[i][0];
         let userGuesses = leaderboard[i][1];
@@ -259,20 +258,6 @@ function displayLeaderboard(level){
         // Insert the new row at the top of the table
         tableBody.appendChild(newRow);
     }
-}
-
-// Requests Data from DB and pulls JSON data and formats it
-function requestData(){
-    // HAS TO BE COMPLETED TO GET SONG DATA FOR GAME
-
-    // Data received (correct if wrong):
-    // Song Name - String
-    // Song Artist - String
-    // Percentage Difficulty - String
-    // Array of strings (completed song)
-    // Array of strings (lyrics with obfuscated words)
-
-    console.log('requestData() called');
 }
 
 // Sends guessData to DB as a cookie
@@ -329,7 +314,6 @@ function reloadCookies(){
             songName = songName2;
             songBlank = songBlank2;
             songArtist = songArtist2;
-            percentDif = percentDif2;
             finishedSong = finishedSong2;
             brokeSong = brokeSong2;
         }
@@ -337,7 +321,6 @@ function reloadCookies(){
             songName = songName3;
             songBlank = songBlank3;
             songArtist = songArtist3;
-            percentDif = percentDif3;
             finishedSong = finishedSong3;
             brokeSong = brokeSong3;
         }
@@ -351,37 +334,125 @@ function reloadCookies(){
     }
 }
 
+// Gets the leaderboard data from the DB
+async function getLeaderboardData(level){
+    const req = await fetch('/api/getLB', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({"level": level})
+    });
+    const reqData = await req.json();
+    console.log("Leaderboard Data Received");
+    if(reqData.length != 0){ // TEMPORARY; to only load in data if there even is data
+        if (level == 1){
+            leaderboard1 = reqData;
+        }
+        else if (level == 2){
+            leaderboard2 = reqData;
+        } else if (level == 3){
+            leaderboard3 = reqData;
+        }
+    }
+    console.log(leaderboard1);
+}
+
+// Generate a blank space array for a song title
+function generateBlank(songName){
+    var blankTitle = [];
+    for(i in songName){ // Iterate through each word in the title
+        let tempString = "";
+        for(j in songName[i]){ // Iterate through each letter in the word and make a blank for each
+            tempString = tempString.concat('_');
+        }
+        blankTitle.push(tempString);
+    }
+    return blankTitle;
+}
+
+// Get song data from DB
+async function getSongData(){
+    const req = await fetch('/api/getDailySongs', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    });
+    const reqData = await req.json();
+    console.log("Song Data Received");
+
+    // Level 1 Song
+    songName = reqData[0]['name'].split(" ");
+    songBlank = generateBlank(songName);
+    songArtist = reqData[0]['artist'];
+    finishedSong = reqData[0]['lyrics'];
+    brokeSong = reqData[0]['obfLyrics'];
+
+    console.log("Level 1 Song:");
+    console.log(songName);
+    console.log(songBlank);
+    console.log(songArtist);
+    console.log(finishedSong);
+    console.log(brokeSong);
+
+    // Level 2 Song
+    songName2 = reqData[1]['name'].split(" ");
+    songBlank2 = generateBlank(songName2);
+    songArtist2 = reqData[1]['artist'];
+    finishedSong2 = reqData[1]['lyrics'];
+    brokeSong2 = reqData[1]['obfLyrics'];
+
+    console.log("Level 2 Song:");
+    console.log(songName2);
+    console.log(songBlank2);
+    console.log(songArtist2);
+    console.log(finishedSong2);
+    console.log(brokeSong2);
+
+    // Level 3 Song
+    songName3 = reqData[2]['name'].split(" ");
+    songBlank3 = generateBlank(songName3);
+    songArtist3 = reqData[2]['artist'];
+    finishedSong3 = reqData[2]['lyrics'];
+    brokeSong3 = reqData[2]['obfLyrics'];
+
+    console.log("Level 3 Song:");
+    console.log(songName3);
+    console.log(songBlank3);
+    console.log(songArtist3);
+    console.log(finishedSong3);
+    console.log(brokeSong3);
+    
+}
 // SAMPLE DATA BELOW FOR HARD CODED TESTING
-let songName = ["Roar"];
-let songBlank = ["____"];
-let songArtist = "Katy Perry";
-let percentDif = "20%";
-let finishedSong = ['I', 'used', 'to', 'bite', 'my', 'tongue', 'and', 'hold', 'my', 'breath', 'Scared', 'to', 'rock', 'the', 'boat', 'and', 'make', 'a', 'mess', 'So', 'I', 'sat', 'quietly', 'agreed', 'politely', 'I', 'guess', 'that', 'I', 'forgot', 'I', 'had', 'a', 'choice', 'I', 'let', 'you', 'push', 'me', 'past', 'the', 'breaking', 'point', 'I', 'stood', 'for', 'nothing,', 'so', 'I', 'fell', 'for', 'everything', '~', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Already', 'brushing', 'off', 'the', 'dust', 'You', 'hear', 'my', 'voice,', 'you', 'hear', 'that', 'sound', 'Like', 'thunder,', 'gonna', 'shake', 'the', 'ground', 'You', 'held', 'me', 'down,', 'but', 'I', 'got', 'up', '(hey)', 'Get', 'ready', "'cause", "I've", 'had', 'enough', 'I', 'see', 'it', 'all,', 'I', 'see', 'it', 'now', '~', 'I', 'got', 'the', 'eye', 'of', 'the', 'tiger,', 'a', 'fighter', 'Dancing', 'through', 'the', 'fire', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'Louder,', 'louder', 'than', 'a', 'lion', "'Cause", 'I', 'am', 'a', 'champion,', 'and', "you're", 'gonna', 'hear', 'me', 'roar', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh', 'oh',"You're", 'gonna', 'hear', 'me', 'roar',];
-let brokeSong = ['_', '____', 'to', 'bite', '__', '______', 'and', 'hold', '__', '______', '______', 'to', '____', 'the', 'boat', 'and', 'make', 'a', 'mess', 'so', '_', '___', '_______', '______', 'politely', 'i', 'guess', '____', 'i', 'forgot', 'i', 'had', 'a', 'choice', '_', '___', 'you', 'push', '__', '____', 'the', 'breaking', 'point', '_', '_____', 'for', 'nothing', 'so', '_', 'fell', 'for', '__________', '~', '___', 'held', '__', 'down,', 'but', 'i', 'got', '__', '(hey!)', 'already', 'brushing', 'off', 'the', 'dust', '___', 'hear', '__', 'voice,', 'you', '____', '____', '_____', 'like', 'thunder', '_____', '_____', 'the', 'ground', 'you', 'held', '__', '_____', 'but', 'i', '___', '__', '_____', 'get', 'ready', '______', "i've", 'had', '______', 'i', 'see', '__', 'all,', 'i', 'see', '__', 'now', '~','i', '___', 'the', '___', '__', '___', '_____', 'a', 'fighter', 'dancing', '_______', '___', 'fire', "'cause", '_', 'am', 'a', '________', '___', '______', '_____', '____', 'me', '____', '_______', '______', 'than', 'a', '____', '______', 'i', 'am', '_', 'champion', '___', "you're", '_____', '____', 'me', '____', '__', 'oh', 'oh', '__', '__', '__', '__', '__', 'oh', '__', 'oh', 'oh', '__', 'oh', 'oh', 'oh', '__', '__', 'oh', 'oh', 'oh', '______', 'gonna', '____', 'me', '____'];
+let songName= [];
+let songBlank = [];
+let songArtist = "";
+let finishedSong = [];
+let brokeSong = [];
 let leaderboard1 = [['user1', 'numGuess1'], ['user2', 'numGuess2'], ['user3', 'numGuess3'], ['user4', 'numGuess4'],['user5', 'numGuess5']];
 
 
-let songName2 = ["Flowers"];
-let songBlank2 = ["_______"];
-let songArtist2 = "Miley Cyrus";
-let percentDif2 = "50%";
-let finishedSong2 =  ['i', 'can', 'buy', 'myself', 'flowers'];
-let brokeSong2 = ['i', '___', 'buy', 'myself', '_______'];
+let songName2 = [];
+let songBlank2 = [];
+let songArtist2 = "";
+let finishedSong2 = [];
+let brokeSong2 = [];
 let leaderboard2 = [['user6', 'numGuess6'], ['user7', 'numGuess7'], ['user8', 'numGuess8'], ['user9', 'numGuess9'],['user10', 'numGuess10']];
 
 
-let songName3 = ["Just", "The", "Way", "You", "Are"];
-let songBlank3 = ["____", "___", "___", "___", "___"];
-let songArtist3 = "Bruno Mars";
-let percentDif3 = "80%";
-let finishedSong3 =  ['her', 'eyes', 'her', 'eyes', 'make', 'the', 'stars', 'look', 'like', "they're", 'not', 'shining'];
-let brokeSong3 = ['___', 'eyes', '___', 'eyes', '____', '___', '_____', 'look', '____', "they're", 'not', '_______'];
+let songName3 = [];
+let songBlank3 = [];
+let songArtist3 = "";
+let finishedSong3 =  [];
+let brokeSong3 = [];
 let leaderboard3 = [['user11', 'numGuess11'], ['user12', 'numGuess12'], ['user13', 'numGuess13'], ['user14', 'numGuess14'],['user15', 'numGuess15']];
 
 
 // START INITIAL STARTUP CODE
 // DO NOT MODIFY
-
+getSongData();
 
 // Load instructions popup and black overlay ; when user closes out popup, page is updated with song info
 popup.classList.add("open-popup"); 

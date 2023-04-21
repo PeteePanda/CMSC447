@@ -62,7 +62,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         if line:
 
             # Check for [] line and skip it
-            if line[0] == "[" and line[-1] == "]":
+            if (line.find("[") != -1 or line.find("]") != -1):
 
                 continue
             # Ensure consistent encoding
@@ -126,7 +126,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     return_obf_array = []
     for line in obfuscated_lines:
         if "~" not in line:
-            line = line + "~"
+            line = line + " ~ "
         words = line.split()
         return_obf_array += words
 
@@ -137,10 +137,13 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             if line[0] == "[" and line[-1] == "]":
                 return_clean_array.append("~")
                 continue
-            line = line + "~"
+            line = line + " ~ "
             words = line.split()
             return_clean_array += words
 
+    if(songName == "You Proof"):
+        print("clean" , return_clean_array)
+        print("Obf: " , return_obf_array)
     return return_obf_array, return_clean_array
 
 
@@ -188,17 +191,30 @@ class Lyridact_DB:
                 id INTEGER,
                 songData TEXT
             );"""
-            create_leaderboard_table = """CREATE TABLE leaderboard (
+            create_easyLeaderboard_table = """CREATE TABLE easyLeaderboard (
                 cookie TEXT,
                 points INTEGER
             );"""
+
+            create_mediumLeaderboard_table = """CREATE TABLE mediumLeaderboard (
+                cookie TEXT,
+                points INTEGER
+            );"""
+
+            create_hardLeaderboard_table = """CREATE TABLE hardLeaderboard (
+                cookie TEXT,
+                points INTEGER
+            );"""
+
             create_user_table = """CREATE TABLE users (
                 cookie TEXT,
                 userData TEXT
             );"""
 
             db.execute(create_song_table)
-            db.execute(create_leaderboard_table)
+            db.execute(create_easyLeaderboard_table)
+            db.execute(create_mediumLeaderboard_table)
+            db.execute(create_hardLeaderboard_table)
             db.execute(create_user_table)
             db.commit()
             print("Table reset.")
@@ -210,7 +226,7 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def downloadSongs(self, subset):
+    def downloadSongs(self, subset=100):
         # subset allows you to download only subset number of songs
 
         def getSpotifyAccessToken():
@@ -380,16 +396,47 @@ class Lyridact_DB:
         indexes = []
         songs = []
         num_songs = self.getSongTableSize()
+        if num_songs == 0:
+            print("Song table is empty")
+            return False
         for _ in range(3):
             indexes.append(random.randint(1, num_songs))
-        for index in indexes:
-            song = self.getSongFromDB(index)
-            if song == False:
-                return False
-            else:
-                songs.append(self.getSongFromDB(index))
 
-        return songs
+        easySong = self.getSongFromDB(indexes[0])
+        mediumSong = self.getSongFromDB(indexes[1])
+        hardSong = self.getSongFromDB(indexes[2])
+
+        if easySong == False or mediumSong == False or hardSong == False:
+            return False
+        
+        easyData = json.loads(easySong[0][1])
+        mediumData = json.loads(mediumSong[0][1])
+        hardData = json.loads(hardSong[0][1])
+
+        easyJSON = {
+            "level": 1,
+            "artist": easyData["artists"],
+            "lyrics": easyData["lyrics"],
+            "name": easyData["name"],
+            "obfLyrics": easyData["obfPatterns"]["easy"]
+        }
+        mediumJSON = {
+            "level": 2,
+            "artist": mediumData["artists"],
+            "lyrics": mediumData["lyrics"],
+            "name": mediumData["name"],
+            "obfLyrics": mediumData["obfPatterns"]["medium"]
+        }
+
+        hardJSON = {
+            "level": 3,
+            "artist": hardData["artists"],
+            "lyrics": hardData["lyrics"],
+            "name": hardData["name"],
+            "obfLyrics": hardData["obfPatterns"]["hard"]
+        }
+
+        return [easyJSON, mediumJSON, hardJSON]
 
     def getUserFromCookie(self, cookie):
         try:
@@ -439,15 +486,21 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def getLeaderboard(self):
+    def getLeaderboard(self, level):
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"SELECT * FROM leaderboard ORDER BY points DESC"
+            if level == 1:
+                query = "SELECT * FROM easyLeaderboard ORDER BY points ASC"
+            elif level == 2:
+                query = "SELECT * FROM mediumLeaderboard ORDER BY points ASC"
+            elif level == 3:
+                query = "SELECT * FROM hardLeaderboard ORDER BY points ASC"
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                return data
+                return_data = [[cookie, str(points)] for cookie, points in data]
+                return return_data
             else:
                 return False
         except:
@@ -455,11 +508,16 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def addScoreToLeaderboard(self, points, cookie):
+    def addScoreToLeaderboard(self, points, cookie, level):
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"INSERT INTO leaderboard VALUES ('{cookie}', {points})"
+            if level == 1:
+                query = f"INSERT INTO easyLeaderboard VALUES ('{cookie}', {points})"
+            elif level == 2:
+                query = f"INSERT INTO mediumLeaderboard VALUES ('{cookie}', {points})"
+            elif level == 3:
+                query = f"INSERT INTO hardLeaderboard VALUES ('{cookie}', {points})"
             cursor.execute(query)
             db.commit()
             return True
@@ -468,17 +526,34 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def resetLeaderboard(self):
+    def resetLeaderboard(self, level):
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = "DROP TABLE leaderboard"
+            if level == 1:
+                query = "DROP TABLE easyLeaderboard"
+            elif level == 2:
+                query = "DROP TABLE mediumLeaderboard"
+            elif level == 3:
+                query = "DROP TABLE hardLeaderboard"
             cursor.execute(query)
             db.commit()
-            query = """CREATE TABLE leaderboard (
-                cookie TEXT,
-                points INTEGER
-            );"""
+            if level == 1:
+                query = """CREATE TABLE easyLeaderboard (
+                    cookie TEXT,
+                    points INTEGER
+                );"""
+            elif level == 2:
+                query = """CREATE TABLE mediumLeaderboard (
+                    cookie TEXT,
+                    points INTEGER
+                );"""
+            elif level == 3:
+                query = """CREATE TABLE hardLeaderboard (
+                    cookie TEXT,
+                    points INTEGER
+                );"""
+
             cursor.execute(query)
             db.commit()
             return True
@@ -487,8 +562,8 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def postTopFive(self, url):
-        lb = self.getLeaderboard()[:5]
+    def postTopFive(self, url, level):
+        lb = self.getLeaderboard(level)[:5]
         if lb:
             # Still need to get correct format for json from prof
             data = {}
