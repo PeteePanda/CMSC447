@@ -62,7 +62,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         if line:
 
             # Check for [] line and skip it
-            if line[0] == "[" and line[-1] == "]":
+            if (line.find("[") != -1 or line.find("]") != -1):
 
                 continue
             # Ensure consistent encoding
@@ -126,7 +126,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     return_obf_array = []
     for line in obfuscated_lines:
         if "~" not in line:
-            line = line + "~"
+            line = line + " ~ "
         words = line.split()
         return_obf_array += words
 
@@ -137,10 +137,13 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             if line[0] == "[" and line[-1] == "]":
                 return_clean_array.append("~")
                 continue
-            line = line + "~"
+            line = line + " ~ "
             words = line.split()
             return_clean_array += words
 
+    if(songName == "You Proof"):
+        print("clean" , return_clean_array)
+        print("Obf: " , return_obf_array)
     return return_obf_array, return_clean_array
 
 
