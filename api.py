@@ -17,6 +17,7 @@ def api_downloadSongs():
 @app.route('/api/getDailySongs')
 def api_getSongs():
     today = datetime.today().strftime('%Y-%m-%d')
+    print("RUNNING GET SONGS")
     return(jsonify(database.sendTodaySongs(today)))
 
 @app.route('/api/updateUser', methods=['POST'])
@@ -27,7 +28,25 @@ def api_updateUser():
     level = content['level']
     database.updateUser(cookie, wordList, level)
     return ('', 204)
-    
+
+@app.route('/api/getLB', methods=['POST'])
+def api_getLeaderboard():
+    level = request.get_json()['level']
+    print(request.get_json())
+    lb = database.getLeaderboard(int(level))
+    if lb:
+        return(jsonify(lb[:5]), 200)
+    else:
+        return(jsonify([]), 200)
+
+@app.route('/api/addLBScore', methods=['POST'])
+def api_addLBScore():
+    content = request.get_json()
+    points = content['points']
+    level = content['level']
+    cookie = content['cookie']
+    database.addScoreToLeaderboard(points, cookie, int(level))
+    return ('', 204)
 
 @app.route('/', methods=['GET'])
 def homePage():
