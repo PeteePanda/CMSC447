@@ -299,6 +299,58 @@ function listInvalids(){
     }
 }
 
+function showPopup(){
+    const giveupPopup = document.getElementById('giveup-popup');
+    console.log("sendCookie function Activated");
+    const overlay = document.querySelector('.overlay')
+    overlay.style.display = 'block';
+    giveupPopup.style.visibility = 'visible'; 
+    //popupButton.style.display = 'block';
+
+    //popupContainer.style.display = "block";
+}
+
+function yesButton(){
+    const overlay = document.querySelector('.overlay')
+    const giveupPopup = document.getElementById('giveup-popup');
+    overlay.style.display = 'none';
+    giveupPopup.style.visibility = 'hidden'; 
+    popupButton.innerHTML = "Next Level";
+    if(level == 1){
+        popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
+        // Set the new level's variables
+        songName = songName2;
+        songBlank = songBlank2;
+        songArtist = songArtist2;
+        percentDif = percentDif2;
+        finishedSong = finishedSong2;
+        brokeSong = brokeSong2;
+    }
+    else if(level == 2){
+        popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
+        // Set the new level's variables
+        songName = songName3;
+        songBlank = songBlank3;
+        songArtist = songArtist3;
+        percentDif = percentDif3;
+        finishedSong = finishedSong3;
+        brokeSong = brokeSong3;
+    }
+    else if(level >= 3){
+        popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
+        popupButton.innerHTML = "See you tomorrow!";
+        level = 3; // Reset level to 3
+    }
+    level+= 1;
+}
+function noButton(){
+    const overlay = document.querySelector('.overlay')
+    const giveupPopup = document.getElementById('giveup-popup');
+    overlay.style.display = 'none';
+    giveupPopup.style.visibility = 'hidden'; 
+
+}
+
 // Close popup ; initiates a game start
 function closePopup(){
     popup.classList.remove("open-popup");
@@ -318,6 +370,7 @@ function closePopup(){
     }
     listInvalids(); // Populate a list of all invalid guesses
 }
+
 
 // RELOAD COOKIES
 function reloadCookies(){
