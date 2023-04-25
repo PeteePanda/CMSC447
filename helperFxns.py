@@ -51,6 +51,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Scraping weirdness puts this phrase in some lyrics, remove it
     lyrics = re.sub(r"you might also like", "", songLyrics.lower())
+    lyrics = re.sub(r"\n.*liveget tickets.*\n", "", lyrics)
     # Split the lyrics by newline, this puts every line into an index
     # as well as giving all [Verse] lines their own index
     lines = re.split(r"\n", lyrics)
@@ -63,7 +64,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
             # Check for [] line and skip it
             if (line.find("[") != -1 or line.find("]") != -1):
-
                 continue
             # Ensure consistent encoding
             line = line.replace("\u0435", "\u0065")
@@ -143,7 +143,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     if(songName == "You Proof"):
         print("clean" , return_clean_array)
-        print("Obf: " , return_obf_array)
+        print("\nObf: " , return_obf_array)
     return return_obf_array, return_clean_array
 
 

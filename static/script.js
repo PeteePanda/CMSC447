@@ -6,7 +6,7 @@ addGuessBtn.addEventListener('click', function() {
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
 
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
+    if(usedGuesses.includes(guessString)){
         console.log("Invalid or used word");
     }
     else{
@@ -35,23 +35,24 @@ addGuessBtn.addEventListener('click', function() {
 
 // Tries to solve the puzzle using the valid guess and returns how frequent it shows up in the puzzle
 function processGuess(guessString){
-       // Count the number of hits in the song and fill in the lyrics (brokeSong array)
-       let wordCount = 0;
-       for (i in finishedSong) {
-           if(guessString == finishedSong[i].toLowerCase()){
-               wordCount+=1;
-               brokeSong[i] = finishedSong[i];
-           }
-       }
+    // Count the number of hits in the song and fill in the lyrics (brokeSong array)
+    let wordCount = 0;
 
-       // If their guess is in the song name, increment wordCount and fill in title
-       for (i in songName) {
-           if(guessString == songName[i].toLowerCase()){
-               wordCount+=1;
-               songBlank[i] = songName[i];
-           }
-       }
-       return wordCount;
+    for(i in finishedSong) {
+        if(guessString == finishedSong[i].toLowerCase() || guessString == finishedSong[i].toLowerCase().slice(-1) || guessString == finishedSong[i].toLowerCase().slice(0) ){
+            wordCount+=1;
+            brokeSong[i] = finishedSong[i];
+        }
+    }
+
+    // If their guess is in the song name, increment wordCount and fill in title
+    for (i in songName) {
+        if(guessString == songName[i].toLowerCase()){
+            wordCount+=1;
+            songBlank[i] = songName[i];
+        }
+    }
+    return wordCount;
 }
 
 // Clear out a table
@@ -103,6 +104,7 @@ function updatePage() {
 
     // Display Title
     title.innerHTML += "'";
+    console.log("getting songblank ", songBlank )
     for(i in songBlank){ // Iterate through each word
         // Insert a space in front of every word in title except the first
         if(i != 0){ 
@@ -183,7 +185,7 @@ async function roundWin(){
             popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
             // Set the new level's variables
             songName = songName2;
-            songBlank = songBlank2;
+            songBlank = getBlanks();
             songArtist = songArtist2;
             percentDif = percentDif2;
             finishedSong = finishedSong2;
@@ -193,7 +195,7 @@ async function roundWin(){
             popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
             // Set the new level's variables
             songName = songName3;
-            songBlank = songBlank3;
+            songBlank = getBlanks();
             songArtist = songArtist3;
             percentDif = percentDif3;
             finishedSong = finishedSong3;
@@ -210,6 +212,15 @@ async function roundWin(){
         // playAudio();
         level += 1; // Progress to next level
     }
+}
+
+function getBlanks(){
+    const result = [];
+    for (let str of songName) {
+        const underscoreStr = "_".repeat(str.length);
+        result.push(underscoreStr);
+    }
+    return result;
 }
 
 // function playAudio() {
@@ -319,15 +330,36 @@ async function getSongData(){
         },
     });
     const reqData = await req.json();
-    console.log("Song Data Received");
+    console.log("Level 1");
     songName = reqData[0]['name'].split(" ");
     console.log(songName);
+    songBlank = getBlanks();
     songArtist = reqData[0]['artist'];
     console.log(songArtist);
     finishedSong = reqData[0]['lyrics'];
     brokeSong = reqData[0]['obfLyrics'];
     console.log(finishedSong);
     console.log(brokeSong);
+
+    console.log("Level 2");
+    songName2 = reqData[1]['name'].split(" ");
+    console.log(songName2);
+    songArtist2 = reqData[1]['artist'];
+    console.log(songArtist2);
+    finishedSong2 = reqData[1]['lyrics'];
+    brokeSong2 = reqData[1]['obfLyrics'];
+    console.log(finishedSong2);
+    console.log(brokeSong2);
+
+    console.log("Level 3");
+    songName3 = reqData[2]['name'].split(" ");
+    console.log(songName3);
+    songArtist3 = reqData[2]['artist'];
+    console.log(songArtist3);
+    finishedSong3 = reqData[2]['lyrics'];
+    brokeSong3 = reqData[2]['obfLyrics'];
+    console.log(finishedSong3);
+    console.log(brokeSong3);
 
 
 }
