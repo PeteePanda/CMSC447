@@ -1,6 +1,13 @@
 const addGuessBtn = document.querySelector('#guess-btn');
+const nameBtn = document.querySelector('#username-btn');
+
+// Prevent page from refreshing when user hits [Enter] for their username
+nameBtn.addEventListener('click', (event)=>{
+    event.preventDefault();
+});
+
 // Event Listener to manage a user guesses; activates whenever submit button is clicked
-addGuessBtn.addEventListener('click', function() {
+addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
@@ -286,6 +293,23 @@ function listInvalids(){
 
 // Close popup ; initiates a game start
 function closePopup(){
+    // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
+    // close the popup when the form is submitted
+    if(username == ""){
+        const nameInput = document.querySelector('#name-input');
+        let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+        if(playerName != ""){
+            username = playerName; // Give player their chosen name
+        }
+        else{
+            username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
+        }
+        nameInput.value = ""; // Clear the text box
+        let popupInputBox = document.getElementById('username-input');
+        popupInputBox.innerHTML = "";
+    }
+    console.log(username);
+
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
     if(sessionReload == false){
@@ -462,5 +486,6 @@ let leaderboardDiv = document.getElementById('leaderboard');
 
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
+let username = "";
 
 // END INITIAL STARTUP CODE
