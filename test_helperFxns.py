@@ -30,11 +30,19 @@ class TestUtils(unittest.TestCase):
             self.assertTrue( (obfCount / wordCount) <= .25)
         
 
-    # def test_download_and_obf(self):
-    #     db = Lyridact_DB("test_data.db")
-    #     db.reset()
-    #     self.assertTrue(db.downloadSongs(100))
+    def test_download_and_obf(self):
+        db = Lyridact_DB("test_data.db")
+        db.reset()
+        self.assertTrue(db.downloadSongs(100))
     
+    def test_sendTodaySongs(self):
+        db = Lyridact_DB("test_data.db")
+        for day in range(100):
+            today = datetime.datetime.today()
+            test = (today + datetime.timedelta(days=day)).strftime('%Y-%m-%d')
+            songs = db.sendTodaySongs(test)
+            self.assertTrue(songs)
+
     def test_obf_percent(self):
         db = Lyridact_DB("test_data.db")
         test_file = open("test_records/obf_perfent_test.txt", "w")
