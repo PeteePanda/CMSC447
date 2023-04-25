@@ -286,6 +286,21 @@ function listInvalids(){
 
 // Close popup ; initiates a game start
 function closePopup(){
+    // Manage Player Name - Only give a name if one isn't already given
+    if(username == ""){
+        const nameInput = document.querySelector('#name-input');
+        let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+        if(playerName != ""){
+            username = playerName; // Give player their chosen name
+        }
+        else{
+            username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
+        }
+        nameInput.value = ""; // Clear the text box
+        let popupInputBox = document.getElementById('username-input');
+        popupInputBox.innerHTML = "";
+    }
+
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
     if(sessionReload == false){
@@ -462,5 +477,6 @@ let leaderboardDiv = document.getElementById('leaderboard');
 
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
+let username = "";
 
 // END INITIAL STARTUP CODE
