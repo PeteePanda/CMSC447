@@ -303,7 +303,6 @@ function showPopup(){
 }
 
 function yesButton(){
-    const overlay = document.querySelector('.overlay')
     const giveupPopup = document.getElementById('giveup-popup');
     const popupHeader = document.getElementById('popup-header');
     const popupText = document.querySelector('#popup-text');
@@ -325,7 +324,6 @@ function yesButton(){
         songName = songName2;
         songBlank = songBlank2;
         songArtist = songArtist2;
-        percentDif = percentDif2;
         finishedSong = finishedSong2;
         brokeSong = brokeSong2;
     }
@@ -336,7 +334,6 @@ function yesButton(){
         songName = songName3;
         songBlank = songBlank3;
         songArtist = songArtist3;
-        percentDif = percentDif3;
         finishedSong = finishedSong3;
         brokeSong = brokeSong3;
     }
@@ -345,9 +342,13 @@ function yesButton(){
         popupText.textContent = displayLeaderboard(level);
         popupButton.innerHTML = "Come back tommorow and try again!";
         level = 3; // Reset level to 3
-        
+        // Get rid of guess input box when the hard level is beaten
+        let inputDiv = document.querySelector('.input');
+        inputDiv.style.display = 'none';
     }
     level += 1;
+    usedGuesses = []; // Reset usedGuesses to prepare for next game
+    sendUserData(usedGuesses); // Update the cookie data to show they skipped
 }
 function noButton(){
     //close the popup and overlay and go back to the main screen
@@ -355,7 +356,6 @@ function noButton(){
     const giveupPopup = document.getElementById('giveup-popup');
     overlay.style.display = 'none';
     giveupPopup.style.visibility = 'hidden'; 
-
 }
 
 // Close popup ; initiates a game start
