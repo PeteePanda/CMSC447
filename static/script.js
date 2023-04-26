@@ -208,6 +208,9 @@ async function roundWin(){
             popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
             popupButton.innerHTML = "See you tomorrow!";
             level = 3; // Reset level to 3
+            // Get rid of guess input box when the hard level is beaten
+            let  inputDiv = document.querySelector('.input');
+            inputDiv.style.display = 'none';            
         }
         await getLeaderboardData(level);
         popupText.innerHTML = "You placed [INSERT RANK HERE].";
