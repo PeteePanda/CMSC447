@@ -300,24 +300,31 @@ function listInvalids(){
 }
 
 function showPopup(){
+    //show the overlay and the confirming give up popup
     const giveupPopup = document.getElementById('giveup-popup');
-    console.log("sendCookie function Activated");
     const overlay = document.querySelector('.overlay')
     overlay.style.display = 'block';
     giveupPopup.style.visibility = 'visible'; 
-    //popupButton.style.display = 'block';
-
-    //popupContainer.style.display = "block";
 }
 
 function yesButton(){
     const overlay = document.querySelector('.overlay')
     const giveupPopup = document.getElementById('giveup-popup');
-    overlay.style.display = 'none';
+    const popupHeader = document.getElementById('popup-header');
+    const popupText = document.querySelector('#popup-text');
+    const popupButton = document.getElementById('popup-button');
+
     giveupPopup.style.visibility = 'hidden'; 
+    songBlank = songName;
+    brokeSong = finishedSong;
+    updatePage();
+    //Change the popup html class for the skip level popup
+    popupText.textContent = "";
+    popup.classList.add("open-popup")
+    popupButton.classList.add("yes-button")
     popupButton.innerHTML = "Next Level";
     if(level == 1){
-        popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
+        popupHeader.innerHTML = "You have skipped today's Easy Level!";
         // Set the new level's variables
         songName = songName2;
         songBlank = songBlank2;
@@ -327,7 +334,7 @@ function yesButton(){
         brokeSong = brokeSong2;
     }
     else if(level == 2){
-        popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
+        popupHeader.innerHTML = "You have skipped today's Medium Level!";
         // Set the new level's variables
         songName = songName3;
         songBlank = songBlank3;
@@ -337,13 +344,14 @@ function yesButton(){
         brokeSong = brokeSong3;
     }
     else if(level >= 3){
-        popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
-        popupButton.innerHTML = "See you tomorrow!";
+        popupHeader.innerHTML = "Game Over";
+        popupButton.innerHTML = "Come back tommorow and try again!";
         level = 3; // Reset level to 3
     }
     level+= 1;
 }
 function noButton(){
+    //close the popup and overlay and go back to the main screen
     const overlay = document.querySelector('.overlay')
     const giveupPopup = document.getElementById('giveup-popup');
     overlay.style.display = 'none';
