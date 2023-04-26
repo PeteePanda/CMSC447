@@ -26,7 +26,8 @@ def api_updateUser():
     content = request.get_json()
     wordList = content['words']
     level = content['level']
-    database.updateUser(cookie, wordList, level)
+    user = content['user']
+    database.updateUser(cookie, wordList, level, user)
     return ('', 204)
 
 @app.route('/api/getLB', methods=['POST'])

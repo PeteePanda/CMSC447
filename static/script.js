@@ -272,12 +272,13 @@ function sendUserData(usedGuesses){
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/updateUser", true);
     xhr.setRequestHeader("Content-Type", "application/json");
-    var data = JSON.stringify({"words": usedGuesses, "level": level});
+    var data = JSON.stringify({"words": usedGuesses, "level": level, "user": username});
     xhr.send(data);
 
     console.log("sendUsedGuesses function Activated");
     console.log(usedGuesses);
     console.log(level);
+    console.log(username);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.

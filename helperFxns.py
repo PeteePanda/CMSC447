@@ -454,10 +454,11 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def updateUser(self, cookie, wordlist, level):
+    def updateUser(self, cookie, wordlist, level, userName):
         user = self.getUserFromCookie(cookie)
         user['wordsUsed'] = wordlist
         user['levelsUnlocked'] = level
+        user['username'] = userName
 
         try:
             db = self.connect()
@@ -476,7 +477,7 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            newUser = User(1, [])
+            newUser = User(1, [], "")
             query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
             cursor.execute(query)
             db.commit()
@@ -499,11 +500,14 @@ class Lyridact_DB:
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
+                print("got data")
                 return_data = [[cookie, str(points)] for cookie, points in data]
                 return return_data
             else:
+                print("no data")
                 return False
-        except:
+        except Exception as e:
+            print("something went wrong: ", e)
             return False
         finally:
             db.close()
