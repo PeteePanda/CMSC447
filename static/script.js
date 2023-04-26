@@ -324,7 +324,8 @@ function yesButton(){
     popupButton.classList.add("yes-button")
     popupButton.innerHTML = "Next Level";
     if(level == 1){
-        popupHeader.innerHTML = "You have skipped today's Easy Level!";
+        popupHeader.innerHTML = "You have skipped today's Easy Level! ";
+        popupText.textContent = displayLeaderboard(level);
         // Set the new level's variables
         songName = songName2;
         songBlank = songBlank2;
@@ -334,7 +335,8 @@ function yesButton(){
         brokeSong = brokeSong2;
     }
     else if(level == 2){
-        popupHeader.innerHTML = "You have skipped today's Medium Level!";
+        popupHeader.innerHTML = "You have skipped today's Medium Level! \n";
+        popupText.textContent = displayLeaderboard(level);
         // Set the new level's variables
         songName = songName3;
         songBlank = songBlank3;
@@ -344,11 +346,13 @@ function yesButton(){
         brokeSong = brokeSong3;
     }
     else if(level >= 3){
-        popupHeader.innerHTML = "Game Over";
+        popupHeader.innerHTML = "Game Over \n ";
+        popupText.textContent = displayLeaderboard(level);
         popupButton.innerHTML = "Come back tommorow and try again!";
         level = 3; // Reset level to 3
+        
     }
-    level+= 1;
+    level += 1;
 }
 function noButton(){
     //close the popup and overlay and go back to the main screen
