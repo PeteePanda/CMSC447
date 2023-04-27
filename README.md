@@ -4,7 +4,7 @@
 A web-based game where lyrics to a song with varying amounts of words redacted are given to a player, who then tries to guess word by word what the title of the song is. There are 3 levels and they are updated everyday. Users can compete and have their scores uploaded to the global leaderboards.
 ## Preview
 
-![Screenshot of Lyridact](https://github.com/PeteePanda/CMSC447/tree/main/media/GameShot1.png)
+![Screenshot of Lyridact](https://github.com/PeteePanda/CMSC447/blob/main/media/GameShot1.png)
 
 
 
