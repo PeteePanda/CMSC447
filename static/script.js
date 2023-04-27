@@ -215,15 +215,16 @@ async function roundWin(){
         await getLeaderboardData(level);
         popupText.innerHTML = "You placed [INSERT RANK HERE].";
         displayLeaderboard(level);
-        // playAudio();
+        playAudio();
         level += 1; // Progress to next level
     }
 }
 
-// function playAudio() {
-//     var audio = new Audio("victory.mp3");
-//     audio.play();
-// }
+function playAudio() {
+    console.log('plays');
+    var audio = new Audio("static/victory.mp3");
+    audio.play();
+}
   
 // Displays the leaderboard on the popup in table format, depending on the level
 function displayLeaderboard(level){
