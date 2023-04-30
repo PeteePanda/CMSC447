@@ -39,7 +39,7 @@ function processGuess(guessString){
     let wordCount = 0;
 
     for(i in finishedSong) {
-        if(guessString == finishedSong[i].toLowerCase() || guessString == finishedSong[i].toLowerCase().slice(-1) || guessString == finishedSong[i].toLowerCase().slice(0) ){
+        if(guessString == finishedSong[i].toLowerCase()){
             wordCount+=1;
             brokeSong[i] = finishedSong[i];
         }

@@ -58,10 +58,10 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Look at each word and record how many times they occur
     wordlist = []
+    special_chars = [",", "'", "(", ")","?",".", "!"]
 
     for line in lines:
         if line:
-
             # Check for [] line and skip it
             if (line.find("[") != -1 or line.find("]") != -1):
                 continue
@@ -70,12 +70,16 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             line = line.replace('"', "'")
 
             # remove punctuation
-            clean_line = re.sub(r"""[\\'"?().!,]*""", "", line)
+            #clean_line = re.sub(r"""[\\'"?().!,]*""", "", line)
 
             # create word list
-            words = clean_line.split(" ")
+            #words = line.split(" ")
 
+
+            words = line.split(" ")
+            
             for word in words:
+                
                 # handle hyphenated words
                 if "-" in word:
                     wordSplit = word.split("-")
@@ -87,8 +91,28 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                         if word not in dont_obf:
                            dont_obf.append(word)
                         wordlist.append(word)
+
+                #checks if word starts and ends with speical char
+                if word and (word[0] in special_chars) and (word[-1] in special_chars):
+                    wordlist.append(word[0])
+                    wordlist.append(word[1:-1])
+                    wordlist.append(word[-1])
+
+
+                #checks if the word starts with a punctuation
+                elif word and (word[0] in special_chars):
+                    wordlist.append(word[0])
+                    wordlist.append(word[1:])
+
+                #checks if the word ends with a punctuation 
+                elif word and (word[-1] in special_chars):   
+                    wordlist.append(word[:-1])
+                    wordlist.append(word[-1])
+            
                 else:
                     wordlist.append(word)
+        wordlist.append("~")
+
     # count words in song
     df = pd.value_counts(np.array(wordlist))
     word_count = df.to_dict()
@@ -107,7 +131,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Obf the lyrics
     obfuscated_lines = []
-    for verse in lines:
+    for verse in wordlist:
         if verse:
             if verse[0] == "[" and verse[-1] == "]":
                 obfuscated_lines.append("~")
@@ -122,29 +146,13 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
             obfuscated_lines.append(verse)
 
-    # add ~ to the end of each line for franco's spacing, convert to 1d array
-    return_obf_array = []
-    for line in obfuscated_lines:
-        if "~" not in line:
-            line = line + " ~ "
-        words = line.split()
-        return_obf_array += words
 
-    return_clean_array = []
-    for line in lines:
-        if line:
-            line.replace('"', "'")
-            if line[0] == "[" and line[-1] == "]":
-                return_clean_array.append("~")
-                continue
-            line = line + " ~ "
-            words = line.split()
-            return_clean_array += words
+    if(songName == "As It Was" and percentage == .2):
+        print("wordlist" , wordlist)
+        print("\nlines" , obfuscated_lines)
 
-    if(songName == "You Proof"):
-        print("clean" , return_clean_array)
-        print("\nObf: " , return_obf_array)
-    return return_obf_array, return_clean_array
+
+    return obfuscated_lines, wordlist
 
 
 class User:
@@ -402,9 +410,9 @@ class Lyridact_DB:
         for _ in range(3):
             indexes.append(random.randint(1, num_songs))
 
-        easySong = self.getSongFromDB(indexes[0])
-        mediumSong = self.getSongFromDB(indexes[1])
-        hardSong = self.getSongFromDB(indexes[2])
+        easySong = self.getSongFromDB(43)
+        mediumSong = self.getSongFromDB(27)
+        hardSong = self.getSongFromDB(27)
 
         if easySong == False or mediumSong == False or hardSong == False:
             return False
