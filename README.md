@@ -42,6 +42,17 @@ Start the server
 python3 api.py
 ```
 
+Download Songs if they haven't been downloaded yet. In your web browser enter the URL:
+
+```bash
+http://127.0.0.1:5000/api/downloadSongs
+```
+
+After waiting for the songs to load, play the game by going to this URL:
+
+```bash
+http://127.0.0.1:5000
+```
 
 
 
