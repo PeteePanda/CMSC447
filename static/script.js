@@ -210,7 +210,9 @@ async function roundWin(){
             level = 3; // Reset level to 3
             // Get rid of guess input box when the hard level is beaten
             let  inputDiv = document.querySelector('.input');
-            inputDiv.style.display = 'none';            
+            inputDiv.style.display = 'none';
+            daily = true;
+            hideGiveUpButton();
         }
         await getLeaderboardData(level);
         popupText.innerHTML = "You placed [INSERT RANK HERE].";
@@ -220,6 +222,7 @@ async function roundWin(){
     }
 }
 
+// Play Victory Audio
 function playAudio() {
     console.log('plays');
     var audio = new Audio("static/victory.mp3");
@@ -295,7 +298,14 @@ function listInvalids(){
     }
 }
 
-function showPopup(){
+// When the user is on the last level and it is already skipped/finished
+function hideGiveUpButton(){
+    const giveUpButton = document.getElementById('give-up-btn');
+    giveUpButton.style.visibility = 'hidden'; 
+}
+
+// When the user clicks on the "Give Up Button"
+function showGiveUpPopUp(){
     //show the overlay and the confirming give up popup
     const giveupPopup = document.getElementById('giveup-popup');
     const overlay = document.querySelector('.overlay')
@@ -303,6 +313,7 @@ function showPopup(){
     giveupPopup.style.visibility = 'visible'; 
 }
 
+// When the user clicks "Yes" on the Give-Up Popup - Go to next game
 function yesButton(){
     const giveupPopup = document.getElementById('giveup-popup');
     const popupHeader = document.getElementById('popup-header');
@@ -346,13 +357,16 @@ function yesButton(){
         // Get rid of guess input box when the hard level is beaten
         let inputDiv = document.querySelector('.input');
         inputDiv.style.display = 'none';
+        daily = true;
+        hideGiveUpButton();
     }
     level += 1;
     usedGuesses = []; // Reset usedGuesses to prepare for next game
     sendUserData(usedGuesses); // Update the cookie data to show they skipped
 }
+
+// When the user clicks "No" on the Give-Up Popup - Close the popup and overlay and go back to the main screen
 function noButton(){
-    //close the popup and overlay and go back to the main screen
     const overlay = document.querySelector('.overlay')
     const giveupPopup = document.getElementById('giveup-popup');
     overlay.style.display = 'none';
@@ -555,5 +569,6 @@ let leaderboardDiv = document.getElementById('leaderboard');
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
 let username = "";
+let daily = false; // Denote whether or not the last level is complete or not
 
 // END INITIAL STARTUP CODE
