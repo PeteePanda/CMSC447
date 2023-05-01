@@ -4,7 +4,9 @@
 	<title>Lyridact - Guess the Song!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- <audio id="myAudio" src="/static/victory.mp3"></audio> -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">    
+    <audio id="myAudio" href="{{ url_for('static', filename='victory.mp3') }}"></audio>
 </head>
 <body>
 	<div class="wrapper">
@@ -41,6 +43,12 @@
             <button type="button" onclick="closePopup()" id="popup-button">Play</button>
         </div>
 		<div class="title">Lyridact - Guess the Song!</div>
+        <button class="give-up-btn" id="give-up-btn" onclick="showGiveUpPopUp()">Give Up</button>
+        <div class="giveup-popup" id="giveup-popup">
+            <p> Are you sure you want to give up?</p>
+            <button class = "yes-button" type="button" onclick="yesButton()">Yes</button>
+            <button class = "no-button" type="button" onclick="noButton()">No</button>
+        </div>
 		<div class="content">
 			<div class="main-content">
                 <div class = "song-info">
