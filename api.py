@@ -27,6 +27,8 @@ def api_updateUser():
     wordList = content['words']
     level = content['level']
     user = content['user']
+    print(cookie)
+    print(wordList, level, user)
     database.updateUser(cookie, wordList, level, user)
     return ('', 204)
 
@@ -39,6 +41,15 @@ def api_getLeaderboard():
         return(jsonify(lb[:5]), 200)
     else:
         return(jsonify([]), 200)
+    
+@app.route('/api/getUsername', methods=['POST'])
+def api_getUsername():
+    cookie = request.get_json()['cookie']
+    username = database.getUserFromCookie(cookie)
+    if username:
+        return(jsonify(username), 200)
+    else:
+        return(jsonify(""), 200)
 
 @app.route('/api/addLBScore', methods=['POST'])
 def api_addLBScore():

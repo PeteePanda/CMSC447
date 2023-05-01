@@ -361,14 +361,14 @@ function reloadCookies(){
 
 // Gets the leaderboard data from the DB
 async function getLeaderboardData(level){
-    const req = await fetch('/api/getLB', {
+    const reqlb = await fetch('/api/getLB', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({"level": level})
     });
-    const reqData = await req.json();
+    const reqData = await reqlb.json();
     console.log("Leaderboard Data Received");
     if(reqData.length != 0){ // TEMPORARY; to only load in data if there even is data
         if (level == 1){

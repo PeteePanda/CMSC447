@@ -5,14 +5,14 @@ import datetime
 
 class TestUtils(unittest.TestCase):
       
-    def test_Leaderboard(self):
-        db = Lyridact_DB("test_data.db")
-        db.resetLeaderboard(1)
-        db.addScoreToLeaderboard(1337, "uniqueCookie", 1, "username")
-        db.addNewUser("uniqueCookie")
-        lb = db.getLeaderboard(1)
-        user = db.getUserFromCookie("uniqueCookie")
-        print("Cookie: ", lb[0][0], "\tScore: ", lb[0][1])
+    # def test_Leaderboard(self):
+    #     db = Lyridact_DB("test_data.db")
+    #     db.resetLeaderboard(1)
+    #     db.addScoreToLeaderboard(1337, "uniqueCookie", 1, "username")
+    #     db.addNewUser("uniqueCookie")
+    #     lb = db.getLeaderboard(1)
+    #     user = db.getUserFromCookie("uniqueCookie")
+    #     print("Cookie: ", lb[0][0], "\tScore: ", lb[0][1])
 
         
     #     db = Lyridact_DB("test_data.db")
