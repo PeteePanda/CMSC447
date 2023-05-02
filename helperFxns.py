@@ -148,14 +148,16 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
 
 class User:
-    def __init__(self, lvlsUnlocked, wordsUsed):
+    def __init__(self, lvlsUnlocked, wordsUsed, username):
         self.unlocked = lvlsUnlocked
         self.wordsUsed = wordsUsed
+        self.username = username
 
     def json(self):
         return ({
             "levelsUnlocked": self.unlocked,
-            "wordsUsed": self.wordsUsed
+            "wordsUsed": self.wordsUsed,
+            "username": self.username
         })
 
 
@@ -279,7 +281,7 @@ class Lyridact_DB:
             easy, clean_lyrics = obfLyrics(
                 songLyrics, songName, songArtists, .2)
             medium = obfLyrics(songLyrics, songName, songArtists, .5)[0]
-            hard = obfLyrics(songLyrics, songName, songArtists, .7)[0]
+            hard = obfLyrics(songLyrics, songName, songArtists, .8)[0]
             return (Song(songID, songArtists, clean_lyrics, songName, easy, medium, hard))
 
         def getLyrics(songName, songArtists, songArray, index):
@@ -439,25 +441,29 @@ class Lyridact_DB:
         return [easyJSON, mediumJSON, hardJSON]
 
     def getUserFromCookie(self, cookie):
+
         try:
             db = self.connect()
             cursor = db.cursor()
             query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
             cursor.execute(query)
             row = cursor.fetchall()
-            user = json.loads(row[0][0])
+            user = json.loads(str(row[0][0]))
             return user
 
-        except:
+        except Exception as e:
+            print("Issue getting user: ", e)
             return False
 
         finally:
             db.close()
 
-    def updateUser(self, cookie, wordlist, level):
+    def updateUser(self, cookie, wordlist, level, username):
+        print("Updating: ",cookie, wordlist, level, username)
         user = self.getUserFromCookie(cookie)
         user['wordsUsed'] = wordlist
         user['levelsUnlocked'] = level
+        user['username'] = username
 
         try:
             db = self.connect()
@@ -467,7 +473,8 @@ class Lyridact_DB:
             db.commit()
             return True
 
-        except:
+        except Exception as e:
+            print("Something went wrong updating: ", e)
             return False
         finally:
             db.close()
@@ -476,7 +483,7 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            newUser = User(1, [])
+            newUser = User(1, [], "")
             query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
             cursor.execute(query)
             db.commit()
@@ -499,11 +506,22 @@ class Lyridact_DB:
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
+                print("got data")
+                for cookie, _ in data:
+                    query = f"SELECT userData FROM users WHERE cookie = '{cookie}';"
+                    cursor.execute(query)
+                    row = cursor.fetchall()
+                    print("getting username: ", row)
+                    username = json.loads(str(row[0]))
+                    print("got username")
+                    cookie = username
                 return_data = [[cookie, str(points)] for cookie, points in data]
                 return return_data
             else:
+                print("no data")
                 return False
-        except:
+        except Exception as e:
+            print("something went wrong: ", e)
             return False
         finally:
             db.close()

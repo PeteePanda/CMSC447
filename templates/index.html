@@ -22,7 +22,7 @@
             <div id="username-input" style="display: none;">
                 <form>
                     <div class="username-box">
-                        <input type="text" id="name-input" placeholder="Enter a username if you want your score published!" style="text-align: center;">
+                        <input type="text" id="name-input" placeholder="Enter a username or we'll give you one!" style="text-align: center;">
                         <button type="submit" id="username-btn" style = "display: none;"></button>
                     </div>
                 </form>
@@ -89,7 +89,7 @@
     <script>
         usedGuesses = {{ wordlist | tojson }}; 
         level = {{ currentLevel }};
-        // username = {{playerName}};
+        username = "{{ playerName }}";
     </script>
 </body>
 </html>
