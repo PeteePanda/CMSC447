@@ -171,7 +171,7 @@ async function roundWin(){
     }
 
     // Check win condition
-    if(titleFinished || lyricsFinished){
+    if(titleFinished || lyricsFinished || level == 4){
         // Set both unfinished title and lyrics to their finished versions
         songBlank = songName;
         brokeSong = finishedSong;
@@ -219,7 +219,6 @@ async function roundWin(){
             beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
             popupButton.innerHTML = "See you tomorrow!";
-            level = 3; // Reset level to 3
             // Get rid of guess input box when the hard level is beaten
             let  inputDiv = document.querySelector('.input');
             inputDiv.style.display = 'none';
@@ -384,7 +383,6 @@ function yesButton(){
         popupHeader.innerHTML = "Game Over \n ";
         popupText.textContent = displayLeaderboard(level);
         popupButton.innerHTML = "Come back tommorow and try again!";
-        level = 3; // Reset level to 3
         // Get rid of guess input box when the hard level is beaten
         let inputDiv = document.querySelector('.input');
         inputDiv.style.display = 'none';
@@ -412,7 +410,7 @@ function closePopup(){
     }
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
-    if(sessionReload == false){
+    if(sessionReload == false){ // If session hasn't already been reloaded, attempt to load a cookie
         reloadCookies();
         sessionReload = true;
         updatePage(); // Update the page with new song data
@@ -442,7 +440,7 @@ function reloadCookies(){
             finishedSong = finishedSong2;
             brokeSong = brokeSong2;
         }
-        else if(level == 3){
+        else if(level >= 3){
             songName = songName3;
             songBlank = songBlank3;
             songArtist = songArtist3;
