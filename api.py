@@ -62,19 +62,16 @@ def api_addLBScore():
 
 @app.route('/', methods=['GET'])
 def homePage():
-
     cookie = request.cookies.get('cookie')
     user = database.getUserFromCookie(cookie)
     if not user:
-        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1))
+        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1, playerName=""))
         newCookie = generateCookie()
         resp.set_cookie('cookie', newCookie)
         database.addNewUser(newCookie)
         return resp
     else:
-        
-        
-        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'])
+        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'],playerName=user['username'])
 
         
    
