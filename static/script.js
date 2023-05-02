@@ -185,8 +185,18 @@ async function roundWin(){
         let popupText = document.getElementById('popup-text');
         let popupButton = document.getElementById('popup-button');
 
+        // Show nameInput box to allow user to create a player name for their win
+        let nameInput = document.getElementById('username-input');
+        nameInput.style.display = 'block';
+        // If the user already previously entered a username and it was in the cookie already, prefill in the textbox
+        if(username != ""){
+            let nameText = document.getElementById('name-input')
+            nameText.value = username;
+        }
+
         popupButton.innerHTML = "Next Level";
         if(level == 1){
+            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
             // Set the new level's variables
             songName = songName2;
@@ -196,6 +206,7 @@ async function roundWin(){
             brokeSong = brokeSong2;
         }
         else if(level == 2){
+            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
             // Set the new level's variables
             songName = songName3;
@@ -205,6 +216,7 @@ async function roundWin(){
             brokeSong = brokeSong3;
         }
         else if(level >= 3){
+            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
             popupButton.innerHTML = "See you tomorrow!";
             level = 3; // Reset level to 3
@@ -220,6 +232,24 @@ async function roundWin(){
         playAudio();
         level += 1; // Progress to next level
     }
+}
+
+function createUsername(){
+    // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
+    // close the popup when the form is submitted
+    const nameInput = document.querySelector('#name-input');
+    let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+    if(playerName != ""){
+        username = playerName; // Give player their chosen name
+    }
+    else{
+        username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
+    }
+    nameInput.value = ""; // Clear the text box
+    let nameDiv = document.getElementById('username-input');
+    nameDiv.style.display = 'none';
+
+    console.log(username);
 }
 
 // Play Victory Audio
@@ -376,23 +406,10 @@ function noButton(){
 
 // Close popup ; initiates a game start
 function closePopup(){
-    // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
-    // close the popup when the form is submitted
-    if(username == ""){
-        const nameInput = document.querySelector('#name-input');
-        let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
-        if(playerName != ""){
-            username = playerName; // Give player their chosen name
-        }
-        else{
-            username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
-        }
-        nameInput.value = ""; // Clear the text box
-        let popupInputBox = document.getElementById('username-input');
-        popupInputBox.innerHTML = "";
+    // If they beat the first round, then take whatever is in the username field
+    if(beatRound){
+        createUsername();
     }
-    console.log(username);
-
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
     if(sessionReload == false){
@@ -402,6 +419,7 @@ function closePopup(){
         roundWin(); // Check if user already won this round
     }
     else{
+        beatRound = false;
         usedGuesses = []; // Clear used guesses list
         if(level <= 3){
             clearTable("guessTable"); // Empty the guess table
@@ -569,7 +587,7 @@ let leaderboardDiv = document.getElementById('leaderboard');
 
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
-let username = "";
+let beatRound = false; // Denote if the round they are currently on had been beaten yet for their username
 let daily = false; // Denote whether or not the last level is complete or not
 
 // END INITIAL STARTUP CODE
