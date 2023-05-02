@@ -171,7 +171,7 @@ async function roundWin(){
     }
 
     // Check win condition
-    if(titleFinished || lyricsFinished || level == 4){
+    if(titleFinished || lyricsFinished){
         // Set both unfinished title and lyrics to their finished versions
         songBlank = songName;
         brokeSong = finishedSong;
@@ -230,6 +230,11 @@ async function roundWin(){
         displayLeaderboard(level);
         playAudio();
         level += 1; // Progress to next level
+    }
+    else if(level > 3){
+        const overlay = document.querySelector('.overlay')
+        overlay.style.display = 'block';
+        yesButton();
     }
 }
 
@@ -370,7 +375,7 @@ function yesButton(){
         brokeSong = brokeSong2;
     }
     else if(level == 2){
-        popupHeader.innerHTML = "You have skipped today's Medium Level! \n";
+        popupHeader.innerHTML = "You have skipped today's Medium Level!";
         popupText.textContent = displayLeaderboard(level);
         // Set the new level's variables
         songName = songName3;
@@ -380,7 +385,7 @@ function yesButton(){
         brokeSong = brokeSong3;
     }
     else if(level >= 3){
-        popupHeader.innerHTML = "Game Over \n ";
+        popupHeader.innerHTML = "You have skipped today's Hard Level!";
         popupText.textContent = displayLeaderboard(level);
         popupButton.innerHTML = "Come back tommorow and try again!";
         // Get rid of guess input box when the hard level is beaten
@@ -432,6 +437,7 @@ function reloadCookies(){
     // If there are guesses from a previous session or they aren't on the first level
     console.log(usedGuesses);
     console.log(level);
+    console.log(username);
     if(usedGuesses.length != 0 || level != 1){
         if(level == 2){
             songName = songName2;
