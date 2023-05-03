@@ -5,6 +5,35 @@ from helperFxns import *
 app = Flask(__name__)
 database = Lyridact_DB("data.db")
 
+@app.route("/api/PostLeaderboard", methods=['POST'])
+def api_postLeaderboard():
+    level = request.get_json()['level']
+    lb = database.getLeaderboard(int(level))
+    if not lb:
+        return jsonify([])
+    else:
+        prof_url = "https://eope3o6d7z7e2cc.m.pipedream.net/"
+        headers = {
+            'Content-Type': "application/json"
+        }
+        data = {
+            "data": [
+                {
+                    "Group": "H",
+                    "Title": "Top 5 Scores",
+                    "<1st Name>": "<1st score>",
+                    "<2nd Name>": "<2nd score>",
+                    "<3rd Name>": "<3rd score>",
+                    "<4th Name>": "<4th score>",
+                    "<5th Name>": "<5th score>"
+                }
+            ]
+        }
+        res = requests.post(prof_url, headers=headers, data=data)
+        if res.status_code == 200:
+            print(f"Successfully posted leaderboard {level}")
+
+
 
 @app.route('/api/db/reset')
 def api_resetDB():
