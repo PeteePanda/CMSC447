@@ -506,16 +506,12 @@ class Lyridact_DB:
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                print("got data")
-                for cookie, _ in data:
-                    query = f"SELECT userData FROM users WHERE cookie = '{cookie}';"
-                    cursor.execute(query)
-                    row = cursor.fetchall()
-                    print("getting username: ", row)
-                    username = json.loads(str(row[0]))
-                    print("got username")
-                    cookie = username
-                return_data = [[cookie, str(points)] for cookie, points in data]
+                return_data = list()
+                for _, userData in data:
+                    user = json.loads(userData)
+                    points = user['points']
+                    name  = user['username']
+                    return_data.append([name, points])
                 return return_data
             else:
                 print("no data")

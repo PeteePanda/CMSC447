@@ -12,6 +12,7 @@ def api_postLeaderboard():
     if not lb:
         return jsonify([])
     else:
+        '''
         prof_url = "https://eope3o6d7z7e2cc.m.pipedream.net/"
         headers = {
             'Content-Type': "application/json"
@@ -21,18 +22,34 @@ def api_postLeaderboard():
                 {
                     "Group": "H",
                     "Title": "Top 5 Scores",
-                    "<1st Name>": "<1st score>",
-                    "<2nd Name>": "<2nd score>",
-                    "<3rd Name>": "<3rd score>",
-                    "<4th Name>": "<4th score>",
-                    "<5th Name>": "<5th score>"
+                    f"{lb[0][0]}": f"{lb[0][1]}",
+                    f"{lb[1][0]}": f"{lb[1][1]}",
+                    f"{lb[2][0]}": f"{lb[2][1]}",
+                    f"{lb[3][0]}": f"{lb[3][1]}",
+                    f"{lb[4][0]}": f"{lb[4][1]}"
                 }
             ]
         }
         res = requests.post(prof_url, headers=headers, data=data)
         if res.status_code == 200:
             print(f"Successfully posted leaderboard {level}")
-
+        else:
+            print(f"Failed to post leaderboard {level}")
+        '''
+    data = {
+            "data": [
+                {
+                    "Group": "H",
+                    "Title": "Top 5 Scores",
+                    f"{lb[0][0]}": f"{lb[0][1]}",
+                    f"{lb[1][0]}": f"{lb[1][1]}",
+                    f"{lb[2][0]}": f"{lb[2][1]}",
+                    f"{lb[3][0]}": f"{lb[3][1]}",
+                    f"{lb[4][0]}": f"{lb[4][1]}"
+                }
+            ]
+        }
+    print(data)
 
 
 @app.route('/api/db/reset')
