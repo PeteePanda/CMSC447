@@ -11,9 +11,8 @@ addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
-
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
+    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString) || guessString.length > 15){
         console.log("Invalid or used word");
     }
     else{
