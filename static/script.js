@@ -10,9 +10,9 @@ nameBtn.addEventListener('click', (event)=>{
 addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
-    let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
+    let guessString = guessInput.value.toString().toLowerCase().split(" ").join("").substring(0, 15);; // format guess string
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString) || guessString.length > 15){
+    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
         console.log("Invalid or used word");
     }
     else{
@@ -407,7 +407,8 @@ function createUsername(){
     // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
     // close the popup when the form is submitted
     const nameInput = document.querySelector('#name-input');
-    let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+    let playerName = nameInput.value.toString().toLowerCase().split(" ").join("").replace(/[^a-z0-9]/g, '').substring(0, 15); // format name input
+    console.log(playerName);
     if(playerName != ""){
         username = playerName; // Give player their chosen name
     }
