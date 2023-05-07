@@ -407,7 +407,11 @@ function createUsername(){
     // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
     // close the popup when the form is submitted
     const nameInput = document.querySelector('#name-input');
-    let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+    let playerName = nameInput.value.toString().toLowerCase().split(" ").join("").replace(/[^a-zA-Z0-9]/g, '').substring(0, 15); // format name input
+    if(playerName.length > 15) { // check if playerName is longer than 15 characters
+        playerName = playerName.substring(0, 15); // only take the first 15 characters of the name
+    }
+
     if(playerName != ""){
         username = playerName; // Give player their chosen name
     }
