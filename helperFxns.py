@@ -450,8 +450,8 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
-            cursor.execute(query)
+            query = f"SELECT userData FROM users WHERE cookie = ? LIMIT 1"
+            cursor.execute(query, (cookie,))
             row = cursor.fetchall()
             user = json.loads(str(row[0][0]))
             return user
@@ -490,8 +490,8 @@ class Lyridact_DB:
             db = self.connect()
             cursor = db.cursor()
             newUser = User(1, [], "")
-            query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
-            cursor.execute(query)
+            query = "INSERT INTO users VALUES (?, ?)"
+            cursor.execute(query, (cookie, json.dumps(newUser.json())))
             db.commit()
             return True
         except:
@@ -542,14 +542,14 @@ class Lyridact_DB:
                 leaderboard = "hardLeaderboard"
 
             # Check if the cookie already exists in the leaderboard
-            check_query = f"SELECT COUNT(*) FROM {leaderboard} WHERE cookie = '{cookie}'"
-            cursor.execute(check_query)
+            check_query = f"SELECT COUNT(*) FROM {leaderboard} WHERE cookie = ?"
+            cursor.execute(check_query, (cookie,))
             count = cursor.fetchone()[0]
 
             # If the cookie does not exist in the leaderboard, insert the new score
             if count == 0:
-                query = f"INSERT INTO {leaderboard} VALUES ('{cookie}', '{username}', {points})"
-                cursor.execute(query)
+                query = f"INSERT INTO {leaderboard} VALUES (?,?,?)"
+                cursor.execute(query, (cookie, username, points))
                 db.commit()
                 return True
             else:
