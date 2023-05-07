@@ -473,8 +473,9 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"UPDATE users SET userData = '{json.dumps(user)}' WHERE cookie = '{cookie}';"
-            cursor.execute(query)
+            query = 'UPDATE users SET userData = ? WHERE cookie = ?;'
+            print(query)
+            cursor.execute(query, (json.dumps(user), cookie))
             db.commit()
             return True
 

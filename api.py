@@ -73,8 +73,6 @@ def api_updateUser():
     wordList = content['words']
     level = content['level']
     user = content['user']
-    print(cookie)
-    print(wordList, level, user)
     database.updateUser(cookie, wordList, level, user)
     return ('', 204)
 
