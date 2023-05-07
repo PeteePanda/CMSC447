@@ -298,14 +298,14 @@ async function addLBScore(){
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/addLBScore", true);
     xhr.setRequestHeader("Content-Type", "application/json");
-    var data = JSON.stringify({"cookie": cookie, "points": points, "level": level, "username": username});
+    var data = JSON.stringify({"cookie": cookieStr, "points": points, "level": level, "username": username});
     xhr.send(data);
 
     console.log("addLBScore function Activated");
     console.log(username);
     console.log(points);
     console.log(level);
-    console.log(cookie);
+    console.log(cookieStr);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.
