@@ -97,13 +97,15 @@ def api_getUsername():
 
 @app.route('/api/addLBScore', methods=['POST'])
 def api_addLBScore():
+    cookie = request.cookies.get('cookie')
     content = request.get_json()
     points = content['points']
     level = content['level']
-    cookie = content['cookie']
     username = content['username']
     database.addScoreToLeaderboard(points, cookie, int(level), username)
-    return ('', 204)
+    rank = database.getRanking(int(level), points)
+    print("rank", rank)
+    return (f'{rank}', 204)
 
 @app.route('/', methods=['GET'])
 def homePage():

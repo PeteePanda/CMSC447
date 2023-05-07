@@ -474,7 +474,6 @@ class Lyridact_DB:
             db = self.connect()
             cursor = db.cursor()
             query = 'UPDATE users SET userData = ? WHERE cookie = ?;'
-            print(query)
             cursor.execute(query, (json.dumps(user), cookie))
             db.commit()
             return True
@@ -528,6 +527,27 @@ class Lyridact_DB:
         finally:
             db.close()
 
+    def getRanking(self, level, points):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            if level == 1:
+                query = "SELECT COUNT(*) FROM easyLeaderboard WHERE points < ?"
+            elif level == 2:
+                query = "SELECT COUNT(*) FROM mediumLeaderboard WHERE points < ?"
+            elif level == 3:
+                query = "SELECT COUNT(*) FROM hardLeaderboard WHERE points < ?"
+            cursor.execute(query, (points,))
+            data = cursor.fetchall()
+            if data:
+                return data[0][0] + 1
+            else:
+                return False
+        except:
+            return False
+        finally:
+            db.close()
+
     def addScoreToLeaderboard(self, points, cookie, level, username):
         try:
             db = self.connect()
@@ -542,24 +562,31 @@ class Lyridact_DB:
                 leaderboard = "hardLeaderboard"
 
             # Check if the cookie already exists in the leaderboard
-            check_query = f"SELECT COUNT(*) FROM {leaderboard} WHERE cookie = ?"
+            check_query = f"SELECT * FROM {leaderboard} WHERE cookie = ?"
             cursor.execute(check_query, (cookie,))
-            count = cursor.fetchone()[0]
-
-            # If the cookie does not exist in the leaderboard, insert the new score
-            if count == 0:
+            userScore = cursor.fetchall()
+            print("userScore: ", userScore)
+            if userScore:
+                if userScore[2] > points:
+                    # If the cookie exists in the leaderboard, update the score if the new score is lower
+                    query = f"UPDATE {leaderboard} SET points = ? WHERE cookie = ?"
+                    cursor.execute(query, (points, cookie))
+                    db.commit()
+                    return True
+                elif userScore[2] <= points:
+                    # If the cookie exists in the leaderboard, but the new score is higher, do nothing
+                    return True
+                
+            else:
+                # If the cookie does not exist in the leaderboard, insert the new score
                 query = f"INSERT INTO {leaderboard} VALUES (?,?,?)"
                 cursor.execute(query, (cookie, username, points))
                 db.commit()
                 return True
-            else:
-                return False
-
         except:
             return False
         finally:
             db.close()
-
 
     def resetLeaderboard(self, level):
         try:
@@ -596,16 +623,3 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
-
-    def postTopFive(self, url, level):
-        lb = self.getLeaderboard(level)[:5]
-        if lb:
-            # Still need to get correct format for json from prof
-            data = {}
-            try:
-                x = requests.post(url, json=data)
-                print(x.text)
-                return True
-            except:
-                return False
-        return False
