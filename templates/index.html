@@ -11,6 +11,8 @@
 <body>
 	<div class="wrapper">
         <div class="overlay"></div>
+
+        <!-- How To Play and Leaderboard Pop-up -->
         <div class = "popup" id="popup">
             <h2 id="popup-header">How To Play</h2>
             <p id="popup-text">
@@ -19,14 +21,6 @@
                 <br>The game has three levels, and you can only progress to the next level after beating the previous one.
                 <br><br>Goodluck!
             </p>
-            <div id="username-input" style="display: none;">
-                <form>
-                    <div class="username-box">
-                        <input type="text" id="name-input" placeholder="Enter a username or we'll give you one!" style="text-align: center;">
-                        <button type="submit" id="username-btn" style = "display: none;"></button>
-                    </div>
-                </form>
-            </div>
             <div id = "leaderboard">
                 <h3>Top 5 Players Today</h3>
                 <table id = "leaderboard-table">
@@ -42,13 +36,33 @@
             </div>
             <button type="button" onclick="closePopup()" id="popup-button">Play</button>
         </div>
+
+        <!-- User Name Pop Up -->
+        <div class="username-popup" id="username-popup">
+            <h2>Join the World Leaderboard?</h2>
+            <p>Enter a username below and show the world your scores for each level! Otherwise, we'll give you a fake player name!</p>
+            <div id="username-input">
+                <form>
+                    <div class="username-box">
+                        <input type="text" id="name-input" placeholder="Enter a username here!" style="text-align: center;">
+                        <button type="submit" id="username-btn" style = "display: none;"></button>
+                    </div>
+                </form>
+            </div>
+            <button class = "username-button" type="button" onclick="createUsername()">Sounds Good!</button>
+        </div>
+
 		<div class="title">Lyridact - Guess the Song!</div>
+
+        <!-- Give Up Button and Pop-up -->
         <button class="give-up-btn" id="give-up-btn" onclick="showGiveUpPopUp()">Give Up</button>
         <div class="giveup-popup" id="giveup-popup">
             <p> Are you sure you want to give up?</p>
             <button class = "yes-button" type="button" onclick="yesButton()">Yes</button>
             <button class = "no-button" type="button" onclick="noButton()">No</button>
         </div>
+
+        <!-- Main Content - Song Lyrics and Guess Sidebar -->
 		<div class="content">
 			<div class="main-content">
                 <div class = "song-info">
@@ -80,16 +94,37 @@
             </div>
 		</div>
 	</div>
+    
+    <!-- Info Button -->
+    <div class = "acknowledgments", id="acknowledgments">(i)
+        <div class = "contributors", id="contributors">
+        <center>
+            <p> 
+            Our team developed this game with the goal of creating an experience similar to Wordle, but with a unique twist. 
+            Rather than guessing individual words, players have the opportunity to guess 
+            song lyrics and ultimately identify the corresponding song.  <br><br>Contributors:</p>
+        </center>   
+        <ul>
+            <li>Aidan John</li>
+            <li>Sher Khan</li>
+            <li>Franco Maxey</li>
+            <li>Alan Nguyen</li>
+            <li>Peter Scrandis</li>
+        </ul>
+        </div>
+    </div>
     <script>
         let usedGuesses = [];
         let level = 1;
         let username = "";
+        let cookieStr = "";
     </script>
     <script src="{{ url_for('static', filename='script.js') }}" type="text/javascript"></script>
     <script>
         usedGuesses = {{ wordlist | tojson }}; 
         level = {{ currentLevel }};
         username = "{{ playerName }}";
+        cookieStr = "{{ cookieString }}";
     </script>
 </body>
 </html>
