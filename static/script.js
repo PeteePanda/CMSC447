@@ -407,7 +407,8 @@ function createUsername(){
     // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
     // close the popup when the form is submitted
     const nameInput = document.querySelector('#name-input');
-    let playerName = nameInput.value.toString().toLowerCase().split(" ").join("").replace(/[^a-zA-Z0-9]/g, '').substring(0, 15); // format name input
+    let playerName = nameInput.value.toString().toLowerCase().split(" ").join("").replace(/[^a-z0-9]/g, '').substring(0, 15); // format name input
+    console.log(playerName);
     if(playerName != ""){
         username = playerName; // Give player their chosen name
     }
