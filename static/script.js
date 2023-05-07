@@ -408,10 +408,6 @@ function createUsername(){
     // close the popup when the form is submitted
     const nameInput = document.querySelector('#name-input');
     let playerName = nameInput.value.toString().toLowerCase().split(" ").join("").replace(/[^a-zA-Z0-9]/g, '').substring(0, 15); // format name input
-    if(playerName.length > 15) { // check if playerName is longer than 15 characters
-        playerName = playerName.substring(0, 15); // only take the first 15 characters of the name
-    }
-
     if(playerName != ""){
         username = playerName; // Give player their chosen name
     }
