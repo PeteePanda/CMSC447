@@ -117,12 +117,14 @@
         let usedGuesses = [];
         let level = 1;
         let username = "";
+        let cookieStr = "";
     </script>
     <script src="{{ url_for('static', filename='script.js') }}" type="text/javascript"></script>
     <script>
         usedGuesses = {{ wordlist | tojson }}; 
         level = {{ currentLevel }};
         username = "{{ playerName }}";
+        cookieStr = "{{ cookieString }}";
     </script>
 </body>
 </html>

@@ -212,12 +212,12 @@ async function roundWin(){
             daily = true;
             hideGiveUpButton();
         }
-        await getLeaderboardData(level);
-        popupText.innerHTML = "You placed [INSERT RANK HERE].";
-        displayLeaderboard(level);
+        let rank = await addLBScore(); // Add user's score to leaderboards
+        await getLeaderboardData(level); // Get the updated leaderboard data
+        popupText.innerHTML = "You placed rank #${rank}!";
+        displayLeaderboard(level); // Display the leaderboard data
         playAudio();
         level += 1; // Progress to next level
-        popupFrame = "nextGame";
     }
     else if(level > 3){
         const overlay = document.querySelector('.overlay')
@@ -290,6 +290,22 @@ function sendUserData(usedGuesses){
     console.log(usedGuesses);
     console.log(level);
     console.log(username);
+}
+
+// Sends user score to the DB Leaderboard
+async function addLBScore(){
+    let points = usedGuesses.length;
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/addLBScore", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    var data = JSON.stringify({"cookie": cookie, "points": points, "level": level, "username": username});
+    xhr.send(data);
+
+    console.log("addLBScore function Activated");
+    console.log(username);
+    console.log(points);
+    console.log(level);
+    console.log(cookie);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.
@@ -367,7 +383,6 @@ function yesButton(){
     level += 1;
     usedGuesses = []; // Reset usedGuesses to prepare for next game
     sendUserData(usedGuesses); // Update the cookie data to show they skipped
-    popupFrame = "nextGame";
 }
 
 // When the user clicks "No" on the Give-Up Popup - Close the popup and overlay and go back to the main screen
@@ -593,7 +608,5 @@ let leaderboardDiv = document.getElementById('leaderboard');
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
 let daily = false; // Denote whether or not the last level is complete or not
-let usernameGiven = false;
-let popupFrame = "howtoplay";
 
 // END INITIAL STARTUP CODE

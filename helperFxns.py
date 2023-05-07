@@ -195,16 +195,19 @@ class Lyridact_DB:
             );"""
             create_easyLeaderboard_table = """CREATE TABLE easyLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
             create_mediumLeaderboard_table = """CREATE TABLE mediumLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
             create_hardLeaderboard_table = """CREATE TABLE hardLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
@@ -526,16 +529,16 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def addScoreToLeaderboard(self, points, cookie, level):
+    def addScoreToLeaderboard(self, points, cookie, level, username):
         try:
             db = self.connect()
             cursor = db.cursor()
             if level == 1:
-                query = f"INSERT INTO easyLeaderboard VALUES ('{cookie}', {points})"
+                query = f"INSERT INTO easyLeaderboard VALUES ('{cookie}', '{username}', {points})"
             elif level == 2:
-                query = f"INSERT INTO mediumLeaderboard VALUES ('{cookie}', {points})"
+                query = f"INSERT INTO mediumLeaderboard VALUES ('{cookie}', '{username}', {points})"
             elif level == 3:
-                query = f"INSERT INTO hardLeaderboard VALUES ('{cookie}', {points})"
+                query = f"INSERT INTO hardLeaderboard VALUES ('{cookie}', '{username}', {points})"
             cursor.execute(query)
             db.commit()
             return True
