@@ -11,9 +11,8 @@ addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
     let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
-
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
+    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString) || guessString.length > 15){
         console.log("Invalid or used word");
     }
     else{
@@ -185,18 +184,8 @@ async function roundWin(){
         let popupText = document.getElementById('popup-text');
         let popupButton = document.getElementById('popup-button');
 
-        // Show nameInput box to allow user to create a player name for their win
-        let nameInput = document.getElementById('username-input');
-        nameInput.style.display = 'block';
-        // If the user already previously entered a username and it was in the cookie already, prefill in the textbox
-        if(username != ""){
-            let nameText = document.getElementById('name-input')
-            nameText.value = username;
-        }
-
         popupButton.innerHTML = "Next Level";
         if(level == 1){
-            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Easy Level!";
             // Set the new level's variables
             songName = songName2;
@@ -206,7 +195,6 @@ async function roundWin(){
             brokeSong = brokeSong2;
         }
         else if(level == 2){
-            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Medium Level!";
             // Set the new level's variables
             songName = songName3;
@@ -216,7 +204,6 @@ async function roundWin(){
             brokeSong = brokeSong3;
         }
         else if(level >= 3){
-            beatRound = true;
             popupHeader.innerHTML = "Congrats you beat today's Hard Level!";
             popupButton.innerHTML = "See you tomorrow!";
             // Get rid of guess input box when the hard level is beaten
@@ -225,9 +212,10 @@ async function roundWin(){
             daily = true;
             hideGiveUpButton();
         }
-        await getLeaderboardData(level);
-        popupText.innerHTML = "You placed [INSERT RANK HERE].";
-        displayLeaderboard(level);
+        let rank = await addLBScore(); // Add user's score to leaderboards
+        await getLeaderboardData(level); // Get the updated leaderboard data
+        popupText.innerHTML = "You placed rank #${rank}!";
+        displayLeaderboard(level); // Display the leaderboard data
         playAudio();
         level += 1; // Progress to next level
     }
@@ -236,24 +224,6 @@ async function roundWin(){
         overlay.style.display = 'block';
         yesButton();
     }
-}
-
-function createUsername(){
-    // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
-    // close the popup when the form is submitted
-    const nameInput = document.querySelector('#name-input');
-    let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
-    if(playerName != ""){
-        username = playerName; // Give player their chosen name
-    }
-    else{
-        username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
-    }
-    nameInput.value = ""; // Clear the text box
-    let nameDiv = document.getElementById('username-input');
-    nameDiv.style.display = 'none';
-
-    console.log(username);
 }
 
 // Play Victory Audio
@@ -320,6 +290,22 @@ function sendUserData(usedGuesses){
     console.log(usedGuesses);
     console.log(level);
     console.log(username);
+}
+
+// Sends user score to the DB Leaderboard
+async function addLBScore(){
+    let points = usedGuesses.length;
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/addLBScore", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    var data = JSON.stringify({"cookie": cookieStr, "points": points, "level": level, "username": username});
+    xhr.send(data);
+
+    console.log("addLBScore function Activated");
+    console.log(username);
+    console.log(points);
+    console.log(level);
+    console.log(cookieStr);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.
@@ -407,22 +393,48 @@ function noButton(){
     giveupPopup.style.visibility = 'hidden'; 
 }
 
+function showUsernamePopUp(){
+    //show the overlay and the username popup if the user has no name already
+    if(username == ""){
+        const usernamePopup = document.getElementById('username-popup');
+        const overlay = document.querySelector('.overlay')
+        overlay.style.display = 'block';
+        usernamePopup.style.visibility = 'visible'; 
+    }
+}
+
+function createUsername(){
+    // Manage Player Name - Only give a name if one isn't already given; user can change it while they're still on first level by refreshing
+    // close the popup when the form is submitted
+    const nameInput = document.querySelector('#name-input');
+    let playerName = nameInput.value.toString().toLowerCase().split(" ").join(""); // format name input
+    if(playerName != ""){
+        username = playerName; // Give player their chosen name
+    }
+    else{
+        username = "Player #" + Math.floor(Math.random() * 9002); // Give player a random number between 0-9001
+    }
+    nameInput.value = ""; // Clear the text box
+
+    // Hide the Popup
+    const usernamePopup = document.getElementById('username-popup');
+    const overlay = document.querySelector('.overlay')
+    overlay.style.display = 'none';
+    usernamePopup.style.visibility = 'hidden'; 
+    usernamePopup.style.display = 'none'; 
+}
+
 // Close popup ; initiates a game start
 function closePopup(){
-    // If they beat the first round, then take whatever is in the username field
-    if(beatRound){
-        createUsername();
-    }
     popup.classList.remove("open-popup");
     overlay.style.display = 'none';
     if(sessionReload == false){ // If session hasn't already been reloaded, attempt to load a cookie
-        reloadCookies();
-        sessionReload = true;
-        updatePage(); // Update the page with new song data
-        roundWin(); // Check if user already won this round
+            reloadCookies();
+            sessionReload = true;
+            updatePage(); // Update the page with new song data
+            roundWin(); // Check if user already won this round
     }
     else{
-        beatRound = false;
         usedGuesses = []; // Clear used guesses list
         if(level <= 3){
             clearTable("guessTable"); // Empty the guess table
@@ -430,6 +442,10 @@ function closePopup(){
         updatePage(); // Update the page with new song data
     }
     listInvalids(); // Populate a list of all invalid guesses
+    
+    if(level == 1){
+        showUsernamePopUp();
+    }
 }
 
 // RELOAD COOKIES
@@ -591,7 +607,6 @@ let leaderboardDiv = document.getElementById('leaderboard');
 
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
-let beatRound = false; // Denote if the round they are currently on had been beaten yet for their username
 let daily = false; // Denote whether or not the last level is complete or not
 
 // END INITIAL STARTUP CODE

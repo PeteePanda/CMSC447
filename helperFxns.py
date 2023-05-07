@@ -195,16 +195,19 @@ class Lyridact_DB:
             );"""
             create_easyLeaderboard_table = """CREATE TABLE easyLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
             create_mediumLeaderboard_table = """CREATE TABLE mediumLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
             create_hardLeaderboard_table = """CREATE TABLE hardLeaderboard (
                 cookie TEXT,
+                user TEXT,
                 points INTEGER
             );"""
 
@@ -526,23 +529,38 @@ class Lyridact_DB:
         finally:
             db.close()
 
-    def addScoreToLeaderboard(self, points, cookie, level):
+    def addScoreToLeaderboard(self, points, cookie, level, username):
         try:
             db = self.connect()
             cursor = db.cursor()
+
+            # Choose the appropriate leaderboard table
             if level == 1:
-                query = f"INSERT INTO easyLeaderboard VALUES ('{cookie}', {points})"
+                leaderboard = "easyLeaderboard"
             elif level == 2:
-                query = f"INSERT INTO mediumLeaderboard VALUES ('{cookie}', {points})"
+                leaderboard = "mediumLeaderboard"
             elif level == 3:
-                query = f"INSERT INTO hardLeaderboard VALUES ('{cookie}', {points})"
-            cursor.execute(query)
-            db.commit()
-            return True
+                leaderboard = "hardLeaderboard"
+
+            # Check if the cookie already exists in the leaderboard
+            check_query = f"SELECT COUNT(*) FROM {leaderboard} WHERE cookie = '{cookie}'"
+            cursor.execute(check_query)
+            count = cursor.fetchone()[0]
+
+            # If the cookie does not exist in the leaderboard, insert the new score
+            if count == 0:
+                query = f"INSERT INTO {leaderboard} VALUES ('{cookie}', '{username}', {points})"
+                cursor.execute(query)
+                db.commit()
+                return True
+            else:
+                return False
+
         except:
             return False
         finally:
             db.close()
+
 
     def resetLeaderboard(self, level):
         try:
