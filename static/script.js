@@ -10,9 +10,9 @@ nameBtn.addEventListener('click', (event)=>{
 addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
-    let guessString = guessInput.value.toString().toLowerCase().split(" ").join(""); // format guess string
+    let guessString = guessInput.value.toString().toLowerCase().split(" ").join("").substring(0, 15);; // format guess string
     // Check if word was already guessed or response is blank
-    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString) || guessString.length > 15){
+    if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
         console.log("Invalid or used word");
     }
     else{
