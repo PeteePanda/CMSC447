@@ -404,8 +404,10 @@ class Lyridact_DB:
         if num_songs == 0:
             print("Song table is empty")
             return False
-        for _ in range(3):
-            indexes.append(random.randint(1, num_songs))
+        while len(indexes) < 3:
+            chosenSong = random.randint(1, num_songs)
+            if chosenSong not in indexes:
+                indexes.append(chosenSong)
 
         easySong = self.getSongFromDB(indexes[0])
         mediumSong = self.getSongFromDB(indexes[1])
