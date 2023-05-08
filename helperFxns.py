@@ -512,11 +512,8 @@ class Lyridact_DB:
             data = cursor.fetchall()
             if data:
                 return_data = list()
-                for _, userData in data:
-                    user = json.loads(userData)
-                    points = user['points']
-                    name  = user['username']
-                    return_data.append([name, points])
+                for cookie, user, points in data:
+                    return_data.append([user, points])
                 return return_data
             else:
                 print("no data")
