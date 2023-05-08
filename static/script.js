@@ -497,7 +497,7 @@ async function getLeaderboardData(level){
     });
     const reqData = await reqlb.json();
     console.log("Leaderboard Data Received");
-    if(reqData.length != 0){ // TEMPORARY; to only load in data if there even is data
+    if(reqData.length != 0){ // Only load in data if there even is data
         if (level == 1){
             leaderboard1 = reqData;
         }
@@ -583,7 +583,7 @@ let songBlank = [];
 let songArtist = "";
 let finishedSong = [];
 let brokeSong = [];
-let leaderboard1 = [['user1', 'numGuess1'], ['user2', 'numGuess2'], ['user3', 'numGuess3'], ['user4', 'numGuess4'],['user5', 'numGuess5']];
+let leaderboard1 = [['No Scores Yet!', 'Play to get on the leaderboard!']];
 
 
 let songName2 = [];
@@ -591,7 +591,7 @@ let songBlank2 = [];
 let songArtist2 = "";
 let finishedSong2 = [];
 let brokeSong2 = [];
-let leaderboard2 = [['user6', 'numGuess6'], ['user7', 'numGuess7'], ['user8', 'numGuess8'], ['user9', 'numGuess9'],['user10', 'numGuess10']];
+let leaderboard2 = [['No Scores Yet!', 'Play to get on the leaderboard!']];
 
 
 let songName3 = [];
@@ -599,7 +599,7 @@ let songBlank3 = [];
 let songArtist3 = "";
 let finishedSong3 =  [];
 let brokeSong3 = [];
-let leaderboard3 = [['user11', 'numGuess11'], ['user12', 'numGuess12'], ['user13', 'numGuess13'], ['user14', 'numGuess14'],['user15', 'numGuess15']];
+let leaderboard3 = [['No Scores Yet!', 'Play to get on the leaderboard!']];
 
 
 // START INITIAL STARTUP CODE
