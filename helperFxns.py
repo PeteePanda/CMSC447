@@ -404,8 +404,10 @@ class Lyridact_DB:
         if num_songs == 0:
             print("Song table is empty")
             return False
-        for _ in range(3):
-            indexes.append(random.randint(1, num_songs))
+        while len(indexes) < 3:
+            chosenSong = random.randint(1, num_songs)
+            if chosenSong not in indexes:
+                indexes.append(chosenSong)
 
         easySong = self.getSongFromDB(indexes[0])
         mediumSong = self.getSongFromDB(indexes[1])
@@ -448,8 +450,8 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"SELECT userData FROM users WHERE cookie = '{cookie}' LIMIT 1"
-            cursor.execute(query)
+            query = f"SELECT userData FROM users WHERE cookie = ? LIMIT 1"
+            cursor.execute(query, (cookie,))
             row = cursor.fetchall()
             user = json.loads(str(row[0][0]))
             return user
@@ -471,8 +473,8 @@ class Lyridact_DB:
         try:
             db = self.connect()
             cursor = db.cursor()
-            query = f"UPDATE users SET userData = '{json.dumps(user)}' WHERE cookie = '{cookie}';"
-            cursor.execute(query)
+            query = 'UPDATE users SET userData = ? WHERE cookie = ?;'
+            cursor.execute(query, (json.dumps(user), cookie))
             db.commit()
             return True
 
@@ -487,8 +489,8 @@ class Lyridact_DB:
             db = self.connect()
             cursor = db.cursor()
             newUser = User(1, [], "")
-            query = f"INSERT INTO users VALUES ('{cookie}', '{json.dumps(newUser.json())}')"
-            cursor.execute(query)
+            query = "INSERT INTO users VALUES (?, ?)"
+            cursor.execute(query, (cookie, json.dumps(newUser.json())))
             db.commit()
             return True
         except:
@@ -509,22 +511,36 @@ class Lyridact_DB:
             cursor.execute(query)
             data = cursor.fetchall()
             if data:
-                print("got data")
-                for cookie, _ in data:
-                    query = f"SELECT userData FROM users WHERE cookie = '{cookie}';"
-                    cursor.execute(query)
-                    row = cursor.fetchall()
-                    print("getting username: ", row)
-                    username = json.loads(str(row[0]))
-                    print("got username")
-                    cookie = username
-                return_data = [[cookie, str(points)] for cookie, points in data]
+                return_data = list()
+                for cookie, user, points in data:
+                    return_data.append([user, points])
                 return return_data
             else:
                 print("no data")
                 return False
         except Exception as e:
             print("something went wrong: ", e)
+            return False
+        finally:
+            db.close()
+
+    def getRanking(self, level, points):
+        try:
+            db = self.connect()
+            cursor = db.cursor()
+            if level == 1:
+                query = "SELECT COUNT(*) FROM easyLeaderboard WHERE points < ?"
+            elif level == 2:
+                query = "SELECT COUNT(*) FROM mediumLeaderboard WHERE points < ?"
+            elif level == 3:
+                query = "SELECT COUNT(*) FROM hardLeaderboard WHERE points < ?"
+            cursor.execute(query, (points,))
+            data = cursor.fetchall()
+            if data:
+                return data[0][0] + 1
+            else:
+                return False
+        except:
             return False
         finally:
             db.close()
@@ -543,24 +559,31 @@ class Lyridact_DB:
                 leaderboard = "hardLeaderboard"
 
             # Check if the cookie already exists in the leaderboard
-            check_query = f"SELECT COUNT(*) FROM {leaderboard} WHERE cookie = '{cookie}'"
-            cursor.execute(check_query)
-            count = cursor.fetchone()[0]
-
-            # If the cookie does not exist in the leaderboard, insert the new score
-            if count == 0:
-                query = f"INSERT INTO {leaderboard} VALUES ('{cookie}', '{username}', {points})"
-                cursor.execute(query)
+            check_query = f"SELECT * FROM {leaderboard} WHERE cookie = ?"
+            cursor.execute(check_query, (cookie,))
+            userScore = cursor.fetchall()
+            print("userScore: ", userScore)
+            if userScore:
+                if userScore[2] > points:
+                    # If the cookie exists in the leaderboard, update the score if the new score is lower
+                    query = f"UPDATE {leaderboard} SET points = ? WHERE cookie = ?"
+                    cursor.execute(query, (points, cookie))
+                    db.commit()
+                    return True
+                elif userScore[2] <= points:
+                    # If the cookie exists in the leaderboard, but the new score is higher, do nothing
+                    return True
+                
+            else:
+                # If the cookie does not exist in the leaderboard, insert the new score
+                query = f"INSERT INTO {leaderboard} VALUES (?,?,?)"
+                cursor.execute(query, (cookie, username, points))
                 db.commit()
                 return True
-            else:
-                return False
-
         except:
             return False
         finally:
             db.close()
-
 
     def resetLeaderboard(self, level):
         try:
@@ -597,16 +620,3 @@ class Lyridact_DB:
             return False
         finally:
             db.close()
-
-    def postTopFive(self, url, level):
-        lb = self.getLeaderboard(level)[:5]
-        if lb:
-            # Still need to get correct format for json from prof
-            data = {}
-            try:
-                x = requests.post(url, json=data)
-                print(x.text)
-                return True
-            except:
-                return False
-        return False

@@ -5,6 +5,52 @@ from helperFxns import *
 app = Flask(__name__)
 database = Lyridact_DB("data.db")
 
+@app.route("/api/PostLeaderboard", methods=['POST'])
+def api_postLeaderboard():
+    level = request.get_json()['level']
+    lb = database.getLeaderboard(int(level))
+    if not lb:
+        return jsonify([])
+    else:
+        '''
+        prof_url = "https://eope3o6d7z7e2cc.m.pipedream.net/"
+        headers = {
+            'Content-Type': "application/json"
+        }
+        data = {
+            "data": [
+                {
+                    "Group": "H",
+                    "Title": "Top 5 Scores",
+                    f"{lb[0][0]}": f"{lb[0][1]}",
+                    f"{lb[1][0]}": f"{lb[1][1]}",
+                    f"{lb[2][0]}": f"{lb[2][1]}",
+                    f"{lb[3][0]}": f"{lb[3][1]}",
+                    f"{lb[4][0]}": f"{lb[4][1]}"
+                }
+            ]
+        }
+        res = requests.post(prof_url, headers=headers, data=data)
+        if res.status_code == 200:
+            print(f"Successfully posted leaderboard {level}")
+        else:
+            print(f"Failed to post leaderboard {level}")
+        '''
+    data = {
+            "data": [
+                {
+                    "Group": "H",
+                    "Title": "Top 5 Scores",
+                    f"{lb[0][0]}": f"{lb[0][1]}",
+                    f"{lb[1][0]}": f"{lb[1][1]}",
+                    f"{lb[2][0]}": f"{lb[2][1]}",
+                    f"{lb[3][0]}": f"{lb[3][1]}",
+                    f"{lb[4][0]}": f"{lb[4][1]}"
+                }
+            ]
+        }
+    print(data)
+
 
 @app.route('/api/db/reset')
 def api_resetDB():
@@ -27,8 +73,6 @@ def api_updateUser():
     wordList = content['words']
     level = content['level']
     user = content['user']
-    print(cookie)
-    print(wordList, level, user)
     database.updateUser(cookie, wordList, level, user)
     return ('', 204)
 
@@ -53,13 +97,15 @@ def api_getUsername():
 
 @app.route('/api/addLBScore', methods=['POST'])
 def api_addLBScore():
+    cookie = request.cookies.get('cookie')
     content = request.get_json()
     points = content['points']
     level = content['level']
-    cookie = content['cookie']
     username = content['username']
     database.addScoreToLeaderboard(points, cookie, int(level), username)
-    return ('', 204)
+    rank = database.getRanking(int(level), points)
+    print("rank", rank)
+    return jsonify({"rank": rank}), 200
 
 @app.route('/', methods=['GET'])
 def homePage():
@@ -67,12 +113,12 @@ def homePage():
     user = database.getUserFromCookie(cookie)
     if not user:
         newCookie = generateCookie()
-        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1, playerName="", cookieString=newCookie))
+        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1, playerName=""))
         resp.set_cookie('cookie', newCookie)
         database.addNewUser(newCookie)
         return resp
     else:
-        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'],playerName=user['username'], cookieString=cookie)
+        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'],playerName=user['username'])
 
         
    

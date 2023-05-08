@@ -212,9 +212,9 @@ async function roundWin(){
             daily = true;
             hideGiveUpButton();
         }
-        let rank = await addLBScore(); // Add user's score to leaderboards
+        await addLBScore(); // Add user's score to leaderboards
         await getLeaderboardData(level); // Get the updated leaderboard data
-        popupText.innerHTML = "You placed rank #${rank}!";
+        popupText.innerHTML = "You placed Rank #" + userRank;
         displayLeaderboard(level); // Display the leaderboard data
         playAudio();
         level += 1; // Progress to next level
@@ -293,19 +293,25 @@ function sendUserData(usedGuesses){
 }
 
 // Sends user score to the DB Leaderboard
-async function addLBScore(){
+async function addLBScore() {
     let points = usedGuesses.length;
     let xhr = new XMLHttpRequest();
+    
+    xhr.addEventListener('load', function() {
+    if (xhr.status === 200) {
+        let response = JSON.parse(xhr.responseText);
+        let rank = response.rank;
+        console.log("Received rank:", rank);
+        userRank = rank;
+    } else {
+        console.error("Error occurred:", xhr.statusText);
+    }
+    });
+    
     xhr.open("POST", "/api/addLBScore", true);
     xhr.setRequestHeader("Content-Type", "application/json");
-    var data = JSON.stringify({"cookie": cookieStr, "points": points, "level": level, "username": username});
+    var data = JSON.stringify({"points": points, "level": level, "username": username});
     xhr.send(data);
-
-    console.log("addLBScore function Activated");
-    console.log(username);
-    console.log(points);
-    console.log(level);
-    console.log(cookieStr);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.
@@ -609,5 +615,5 @@ let leaderboardDiv = document.getElementById('leaderboard');
 let invalidWords = [];
 let sessionReload = false; // Denotes if a session reload has happened already
 let daily = false; // Denote whether or not the last level is complete or not
-
+let userRank = '-1'; // Keeps track of user's rank throughout the game.
 // END INITIAL STARTUP CODE
