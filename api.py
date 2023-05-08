@@ -105,7 +105,7 @@ def api_addLBScore():
     database.addScoreToLeaderboard(points, cookie, int(level), username)
     rank = database.getRanking(int(level), points)
     print("rank", rank)
-    return (f'{rank}', 204)
+    return jsonify({"rank": rank}), 200
 
 @app.route('/', methods=['GET'])
 def homePage():
@@ -113,12 +113,12 @@ def homePage():
     user = database.getUserFromCookie(cookie)
     if not user:
         newCookie = generateCookie()
-        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1, playerName="", cookieString=newCookie))
+        resp = make_response(render_template("index.html", wordlist=[], currrentLevel=1, playerName=""))
         resp.set_cookie('cookie', newCookie)
         database.addNewUser(newCookie)
         return resp
     else:
-        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'],playerName=user['username'], cookieString=cookie)
+        return render_template("index.html", wordlist=user['wordsUsed'], currentLevel=user['levelsUnlocked'],playerName=user['username'])
 
         
    
