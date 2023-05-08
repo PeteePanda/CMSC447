@@ -255,7 +255,7 @@ class Lyridact_DB:
         def getTop50():
 
             topFifty = []
-            playlist_id = "37i9dQZEVXbLp5XoPON0wI"
+            playlist_id = "37i9dQZF1EQn4jwNIohw50"
             url = "https://api.spotify.com/v1/playlists/" + playlist_id
             access_token = getSpotifyAccessToken()
             if access_token == None:
