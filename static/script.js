@@ -332,10 +332,11 @@ async function addLBScore() {
 function listInvalids(){
     invalidWords = []; // clear list
     for(i in brokeSong){
-        if(brokeSong[i] == finishedSong[i]){
+        if(brokeSong[i][0] != '_'){
             invalidWords.push(brokeSong[i].toLowerCase());
         }
     }
+    console.log(invalidWords);
 }
 
 // When the user is on the last level and it is already skipped/finished
