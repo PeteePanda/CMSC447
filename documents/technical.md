@@ -35,6 +35,6 @@ You will write technical documentation that outlines the class diagrams, databas
 <p>Whenever a player completes a level, the frontend then sends the cookie, number of guesses, the difficulty they completed, and the username of the player to store in the database. In return the backend returns the rank of the player on that difficulty.
 </p>
 
-<h4><strong>Get Leaderboard: </strong></h4>
-<p>After the user's score is added to the leaderboard, another API call is made where the frontend sends the backend the difficulty completed then the backend returns the top 5 players from that leaderboard ordered by ascending guesses.
+<h4><strong>Get Leaderboard:</strong></h4>
+<p>After the user's score is added to the leaderboard, another API call is made where the frontend sends the backend the difficulty completed then the backend returns the top 5 players (username, guesses) from that leaderboard ordered by ascending guesses.
 </p>
