@@ -147,7 +147,16 @@ function updatePage() {
             else{
                 lyrics.innerHTML += brokeSong[i]; // Add word by word
             }
-            lyrics.innerHTML += " "; // Spaces between each word
+            
+            // don't add a space after an opening parenthesis and don't add one after a word if the next one is a parenthesis
+            let j = parseInt(i)+1;
+            if(brokeSong[i] != "("){
+                if(j < brokeSong.length){
+                    if(brokeSong[j] != ")"){
+                        lyrics.innerHTML += " "; // Spaces between each word
+                    }
+                }
+            }
         }
     }
 }
