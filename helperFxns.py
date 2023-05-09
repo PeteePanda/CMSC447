@@ -430,13 +430,15 @@ class Lyridact_DB:
             print("Song table is empty")
             return False
         while len(indexes) < 3:
-            chosenSong = random.randint(1, num_songs)
-            if chosenSong not in indexes:
-                indexes.append(chosenSong)
+            chosenIndex = random.randint(1, num_songs)
+            chosenSong = self.getSongFromDB(chosenIndex)
+            if chosenSong:
+                if chosenSong not in indexes:
+                    indexes.append(chosenSong)
 
-        easySong = self.getSongFromDB(indexes[0])
-        mediumSong = self.getSongFromDB(indexes[1])
-        hardSong = self.getSongFromDB(indexes[2])
+        easySong = indexes[0]
+        mediumSong = indexes[1]
+        hardSong = indexes[2]
 
         if easySong == False or mediumSong == False or hardSong == False:
             return False
