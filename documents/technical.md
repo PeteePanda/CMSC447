@@ -1,10 +1,13 @@
 You will write technical documentation that outlines the class diagrams, database, and API calls within your project. As the name suggests, this part should be technical.
+<h1><strong>Technical Document</strong></h1>
+<h2><strong>Class Diagram</strong></h2>
+
 
 <h2><strong>Database</strong></h2>
 <p>We use one database split into 5 different tables: songs, users, easyLeaderboard, mediumLeaderboard, and hardLeaderboard.</p>
 
 <h3><strong>songs:</strong></h3>
-<p>The songs database holds 2 columns: id and songData. Id is a unique identifier for each song and is used***. songData holds information about the song recieved from spotify and genius. It holds: artist(s), title, unobfuscated lyrics, easy obfuscated lyrics, medium obfuscated lyrics, and hard obfuscated lyrics.</p>
+<p>The songs database holds 2 columns: id and songData. Id is a unique identifier for each song. songData holds information about the song recieved from spotify and genius. It holds: artist(s), title, unobfuscated lyrics, easy obfuscated lyrics, medium obfuscated lyrics, and hard obfuscated lyrics.</p>
 
 <h3><strong>users:</strong></h3>
 <p>Holds 2 columns of cookie and userData. The cookie is just a unique string to be able to receive the proper userData from the table. userData hold the information of what level the user is on, the guesses the user has made, and the username.</p>
@@ -38,3 +41,4 @@ You will write technical documentation that outlines the class diagrams, databas
 <h4><strong>Get Leaderboard:</strong></h4>
 <p>After the user's score is added to the leaderboard, another API call is made where the frontend sends the backend the difficulty completed then the backend returns the top 5 players (username, guesses) from that leaderboard ordered by ascending guesses.
 </p>
+ 
