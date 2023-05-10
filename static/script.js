@@ -304,23 +304,27 @@ function sendUserData(usedGuesses){
 // Sends user score to the DB Leaderboard
 async function addLBScore() {
     let points = usedGuesses.length;
-    let xhr = new XMLHttpRequest();
-    
-    xhr.addEventListener('load', function() {
-    if (xhr.status === 200) {
-        let response = JSON.parse(xhr.responseText);
-        let rank = response.rank;
-        console.log("Received rank:", rank);
-        userRank = rank;
-    } else {
-        console.error("Error occurred:", xhr.statusText);
+
+    try {
+        let response = await fetch('/api/addLBScore', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ "points": points, "level": level, "username": username })
+        });
+
+        if (response.ok) {
+            let data = await response.json();
+            let rank = data.rank;
+            console.log("Received rank:", rank);
+            userRank = rank;
+        } else {
+            console.error("Error occurred:", response.statusText);
+        }
+    } catch (error) {
+        console.error("Error occurred:", error);
     }
-    });
-    
-    xhr.open("POST", "/api/addLBScore", true);
-    xhr.setRequestHeader("Content-Type", "application/json");
-    var data = JSON.stringify({"points": points, "level": level, "username": username});
-    xhr.send(data);
 }
 
 // Creates a list of all invalid words the user cannot guess for each game.
@@ -328,10 +332,11 @@ async function addLBScore() {
 function listInvalids(){
     invalidWords = []; // clear list
     for(i in brokeSong){
-        if(brokeSong[i] == finishedSong[i]){
+        if(brokeSong[i][0] != '_'){
             invalidWords.push(brokeSong[i].toLowerCase());
         }
     }
+    console.log(invalidWords);
 }
 
 // When the user is on the last level and it is already skipped/finished
