@@ -86,7 +86,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                     # check if all words are the same, if so append
                     if (all(x == wordSplit[0] for x in wordSplit)):
                         for w in wordSplit:
-                            
                             wordlist.append(w)
                     else:
                         if word not in dont_obf:
@@ -149,35 +148,37 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Obf the lyrics
     obfuscated_lines = []
+    clean_lines = []
     for verse in wordlist:
         
         if verse:
             if verse[0] == "[" and verse[-1] == "]":
                 obfuscated_lines.append("~")
+                clean_lines.append('~')
                 continue
 
+            elif not verse.isalpha():
+                obfuscated_lines.append(verse)
+                clean_lines.append(verse)
+                continue
+
+            clean_lines.append(verse)
             for obf_word in obf_combo:
                 if (obf_word not in special_chars):
                     regex = r"\b" + re.escape(obf_word) + r"\b"
                     if re.sub(regex, "_"*len(obf_word), verse) != verse:
                         verse = re.sub(regex, "_"*len(obf_word), verse)
 
+
             obfuscated_lines.append(verse)
 
-
-    if(songName == "Thinkin' Bout Me"):
-        print("\nSong Lyrics", songLyrics)
-        print("\nwordlist" , wordlist)
-        print("\nlines" , obfuscated_lines)
-
-
-    return obfuscated_lines, wordlist
+    return obfuscated_lines, clean_lines
 
 
 
 class User:
-    def __init__(self, lvlsUnlocked, wordsUsed, username):
-        self.unlocked = lvlsUnlocked
+    def __init__(self, levelsUnlocked, wordsUsed, username):
+        self.unlocked = levelsUnlocked
         self.wordsUsed = wordsUsed
         self.username = username
 
@@ -381,6 +382,7 @@ class Lyridact_DB:
                 if lyrics == False or id == False or name == False or artists == False:
                     continue
 
+                name = re.sub(r'[&]', "and",name)
                 name = re.sub(r'[^a-zA-Z]+', " ",name)
                 newSong = create_song(lyrics, name, artists, id)
                 songArray.append(newSong.tuple())
@@ -439,7 +441,6 @@ class Lyridact_DB:
             if chosenSong:
                 if chosenSong not in indexes:
                     indexes.append(chosenSong)
-
         easySong = indexes[0]
         mediumSong = indexes[1]
         hardSong = indexes[2]
