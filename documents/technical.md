@@ -1,4 +1,3 @@
-You will write technical documentation that outlines the class diagrams, database, and API calls within your project. As the name suggests, this part should be technical.
 <h1><strong>Technical Document</strong></h1>
 <h2><strong>Class Diagram</strong></h2>
 <p>There are three main parts to the class diagram: scripts.js, api.py, and helperFxns.py.
