@@ -60,6 +60,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     # Look at each word and record how many times they occur
     wordlist = []
     special_chars = [",", "'", "(", ")","?",".", "!"]
+    nonspecial = []
 
     for line in lines:
         if line:
@@ -75,6 +76,9 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             
             for word in words:
                 
+                if word.isalpha() and word not in nonspecial:
+                    nonspecial.append(word)
+
                 # handle hyphenated words
                 if "-" in word:
                     wordSplit = word.split("-")
@@ -128,7 +132,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         wordlist.append("~")
 
     # count words in song
-    df = pd.value_counts(np.array(wordlist))
+    df = pd.value_counts(np.array(nonspecial))
     word_count = df.to_dict()
     # Definitely obfuscate words in title + artist names
     do_obf += songName.lower().split()
@@ -136,7 +140,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         do_obf += artist.lower().split()
 
     # Calculate the number of words that need to be obf
-    songLength = len(wordlist)
+    songLength = len(nonspecial)
     number_of_words_to_obfuscate = round(percentage * songLength)
 
     # Determine which groups of words should be obf'd
