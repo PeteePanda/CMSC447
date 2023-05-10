@@ -25,7 +25,6 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     def findObfCombo(count_dict, target, do_obf, dont_obf):
         words_to_obf = []
         counter = 0
-        
         # Make sure the given obf words are obfd
         for word in do_obf:
             if word in count_dict.keys():
@@ -72,7 +71,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             line = line.replace('"', "'")
             line = re.sub(r'([()])',r' \1 ', line)
 
-            words = line.split(" ")
+            words = re.split(r'\s+', line)
             
             for word in words:
                 
@@ -147,14 +146,14 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
     # Obf the lyrics
     obfuscated_lines = []
     for verse in wordlist:
+        
         if verse:
             if verse[0] == "[" and verse[-1] == "]":
                 obfuscated_lines.append("~")
                 continue
 
-            verse = re.sub(r'"', "'", verse)
             for obf_word in obf_combo:
-                if (obf_word not in special_chars) or "'" not in obf_word:
+                if (obf_word not in special_chars):
                     regex = r"\b" + re.escape(obf_word) + r"\b"
                     if re.sub(regex, "_"*len(obf_word), verse) != verse:
                         verse = re.sub(regex, "_"*len(obf_word), verse)
@@ -162,7 +161,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
             obfuscated_lines.append(verse)
 
 
-    if(songName == "Search Rescue"):
+    if(songName == "Thinkin' Bout Me"):
         print("\nSong Lyrics", songLyrics)
         print("\nwordlist" , wordlist)
         print("\nlines" , obfuscated_lines)
@@ -378,6 +377,7 @@ class Lyridact_DB:
                 if lyrics == False or id == False or name == False or artists == False:
                     continue
 
+                name = re.sub(r'[^a-zA-Z]+', " ",name)
                 newSong = create_song(lyrics, name, artists, id)
                 songArray.append(newSong.tuple())
 
