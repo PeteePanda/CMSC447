@@ -10,7 +10,7 @@ nameBtn.addEventListener('click', (event)=>{
 addGuessBtn.addEventListener('click', (event)=>{
     event.preventDefault(); // prevent refresh of page
     const guessInput = document.querySelector('#guess-input');
-    let guessString = guessInput.value.toString().toLowerCase().split(" ").join("").substring(0, 15);; // format guess string
+    let guessString = guessInput.value.toString().toLowerCase().split(" ").join("").substring(0, 15); // format guess string
     // Check if word was already guessed or response is blank
     if(usedGuesses.includes(guessString) || (guessString == "") || invalidWords.includes(guessString)){
         console.log("Invalid or used word");
@@ -147,7 +147,16 @@ function updatePage() {
             else{
                 lyrics.innerHTML += brokeSong[i]; // Add word by word
             }
-            lyrics.innerHTML += " "; // Spaces between each word
+            
+            // don't add a space after an opening parenthesis and don't add one after a word if the next one is a parenthesis or comma
+            if(brokeSong[i] != "(" && brokeSong[i] != "'"){
+                let j = parseInt(i)+1;
+                if(j < brokeSong.length){
+                    if(brokeSong[j] != ")" && brokeSong[j] != ","){
+                        lyrics.innerHTML += " "; // Spaces between each word
+                    }
+                }
+            }
         }
     }
 }
@@ -323,10 +332,11 @@ async function addLBScore() {
 function listInvalids(){
     invalidWords = []; // clear list
     for(i in brokeSong){
-        if(brokeSong[i] == finishedSong[i]){
+        if(brokeSong[i][0] != '_'){
             invalidWords.push(brokeSong[i].toLowerCase());
         }
     }
+    console.log(invalidWords);
 }
 
 // When the user is on the last level and it is already skipped/finished
