@@ -435,15 +435,18 @@ class Lyridact_DB:
         if num_songs == 0:
             print("Song table is empty")
             return False
-        while len(indexes) < 3:
-            chosenIndex = random.randint(1, num_songs)
-            chosenSong = self.getSongFromDB(chosenIndex)
-            if chosenSong:
-                if chosenSong not in indexes:
-                    indexes.append(chosenSong)
-        easySong = indexes[0]
-        mediumSong = indexes[1]
-        hardSong = indexes[2]
+        # while len(indexes) < 3:
+        #     chosenIndex = random.randint(1, num_songs)
+        #     chosenSong = self.getSongFromDB(chosenIndex)
+        #     if chosenSong:
+        #         if chosenSong not in indexes:
+        #             indexes.append(chosenSong)
+
+
+        # Hard Coding Songs for Demo
+        easySong = self.getSongFromDB(2-1)
+        mediumSong = self.getSongFromDB(26-1)
+        hardSong = self.getSongFromDB(30-1)
 
         if easySong == False or mediumSong == False or hardSong == False:
             return False
@@ -485,6 +488,8 @@ class Lyridact_DB:
             query = f"SELECT userData FROM users WHERE cookie = ? LIMIT 1"
             cursor.execute(query, (cookie,))
             row = cursor.fetchall()
+            if not row:
+                return False
             user = json.loads(str(row[0][0]))
             return user
 
