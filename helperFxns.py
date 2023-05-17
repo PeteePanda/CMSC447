@@ -20,7 +20,6 @@ def generateCookie():
    letters = string.ascii_lowercase
    return ''.join(random.choice(letters) for i in range(20))
 
-
 def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     def findObfCombo(count_dict, target, do_obf, dont_obf):
@@ -35,8 +34,10 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         while counter <= target:
             # Pick a random word
             choice = random.choice(list(count_dict.keys()))
+
             if choice in dont_obf:
                 continue
+
             # Check if it doesn't exceed the percentage buffer
             if (count_dict[choice] + counter) <= (target + 2):
                 # Add choice to return array and remove it from dict
@@ -51,34 +52,37 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Scraping weirdness puts this phrase in some lyrics, remove it
     lyrics = re.sub(r"you might also like", "", songLyrics.lower())
+    lyrics = re.sub(r"\n.*liveget tickets.*\n", "\n", lyrics)
     # Split the lyrics by newline, this puts every line into an index
     # as well as giving all [Verse] lines their own index
     lines = re.split(r"\n", lyrics)
 
     # Look at each word and record how many times they occur
     wordlist = []
+    special_chars = [",", "'", "(", ")","?",".", "!"]
+    nonspecial = []
 
     for line in lines:
         if line:
-
             # Check for [] line and skip it
             if (line.find("[") != -1 or line.find("]") != -1):
-
                 continue
             # Ensure consistent encoding
             line = line.replace("\u0435", "\u0065")
             line = line.replace('"', "'")
+            line = re.sub(r'([()])',r' \1 ', line)
 
-            # remove punctuation
-            clean_line = re.sub(r"""[\\'"?().!,]*""", "", line)
-
-            # create word list
-            words = clean_line.split(" ")
-
+            words = re.split(r'\s+', line)
+            
             for word in words:
+                
+                if word.isalpha() and word not in nonspecial:
+                    nonspecial.append(word)
+
                 # handle hyphenated words
                 if "-" in word:
                     wordSplit = word.split("-")
+                   
                     # check if all words are the same, if so append
                     if (all(x == wordSplit[0] for x in wordSplit)):
                         for w in wordSplit:
@@ -87,10 +91,47 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
                         if word not in dont_obf:
                            dont_obf.append(word)
                         wordlist.append(word)
+
+                #checks if word starts and ends with speical char
+                elif word and word[0] in special_chars and word[-1] in special_chars:
+                    temp = ""
+                    for chara in word:
+                        if chara not in special_chars:
+                            temp += chara
+
+                        else:
+                            if temp:
+                                wordlist.append(temp)
+                                temp = ""
+                            else:
+                                wordlist.append(chara)
+
+
+                #checks if the word starts with a punctuation
+                elif word and word[0] in special_chars:
+                    wordlist.append(word[0])
+                    wordlist.append(word[1:])
+
+                #checks if the word ends with a punctuation 
+                elif word and word[-1] in special_chars:   
+                    temp = ""
+                    for chara in word:
+                        if chara not in special_chars:
+                            temp += chara
+
+                        else:
+                            if temp:
+                                wordlist.append(temp)
+                                temp = ""
+                            else:
+                                wordlist.append(chara)
+            
                 else:
                     wordlist.append(word)
+        wordlist.append("~")
+
     # count words in song
-    df = pd.value_counts(np.array(wordlist))
+    df = pd.value_counts(np.array(nonspecial))
     word_count = df.to_dict()
     # Definitely obfuscate words in title + artist names
     do_obf += songName.lower().split()
@@ -98,7 +139,7 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
         do_obf += artist.lower().split()
 
     # Calculate the number of words that need to be obf
-    songLength = len(wordlist)
+    songLength = len(nonspecial)
     number_of_words_to_obfuscate = round(percentage * songLength)
 
     # Determine which groups of words should be obf'd
@@ -107,49 +148,37 @@ def obfLyrics(songLyrics, songName, songArtists, percentage):
 
     # Obf the lyrics
     obfuscated_lines = []
-    for verse in lines:
+    clean_lines = []
+    for verse in wordlist:
+        
         if verse:
             if verse[0] == "[" and verse[-1] == "]":
                 obfuscated_lines.append("~")
+                clean_lines.append('~')
                 continue
 
-            verse = re.sub(r'"', "'", verse)
-            for obf_word in obf_combo:
+            elif not verse.isalpha():
+                obfuscated_lines.append(verse)
+                clean_lines.append(verse)
+                continue
 
-                regex = r"\b" + re.escape(obf_word) + r"\b"
-                if re.sub(regex, "_"*len(obf_word), verse) != verse:
-                    verse = re.sub(regex, "_"*len(obf_word), verse)
+            clean_lines.append(verse)
+            for obf_word in obf_combo:
+                if (obf_word not in special_chars):
+                    regex = r"\b" + re.escape(obf_word) + r"\b"
+                    if re.sub(regex, "_"*len(obf_word), verse) != verse:
+                        verse = re.sub(regex, "_"*len(obf_word), verse)
+
 
             obfuscated_lines.append(verse)
 
-    # add ~ to the end of each line for franco's spacing, convert to 1d array
-    return_obf_array = []
-    for line in obfuscated_lines:
-        if "~" not in line:
-            line = line + " ~ "
-        words = line.split()
-        return_obf_array += words
+    return obfuscated_lines, clean_lines
 
-    return_clean_array = []
-    for line in lines:
-        if line:
-            line.replace('"', "'")
-            if line[0] == "[" and line[-1] == "]":
-                return_clean_array.append("~")
-                continue
-            line = line + " ~ "
-            words = line.split()
-            return_clean_array += words
-
-    if(songName == "You Proof"):
-        print("clean" , return_clean_array)
-        print("Obf: " , return_obf_array)
-    return return_obf_array, return_clean_array
 
 
 class User:
-    def __init__(self, lvlsUnlocked, wordsUsed, username):
-        self.unlocked = lvlsUnlocked
+    def __init__(self, levelsUnlocked, wordsUsed, username):
+        self.unlocked = levelsUnlocked
         self.wordsUsed = wordsUsed
         self.username = username
 
@@ -353,6 +382,8 @@ class Lyridact_DB:
                 if lyrics == False or id == False or name == False or artists == False:
                     continue
 
+                name = re.sub(r'[&]', "and",name)
+                name = re.sub(r'[^a-zA-Z]+', " ",name)
                 newSong = create_song(lyrics, name, artists, id)
                 songArray.append(newSong.tuple())
 
@@ -405,13 +436,14 @@ class Lyridact_DB:
             print("Song table is empty")
             return False
         while len(indexes) < 3:
-            chosenSong = random.randint(1, num_songs)
-            if chosenSong not in indexes:
-                indexes.append(chosenSong)
-
-        easySong = self.getSongFromDB(indexes[0])
-        mediumSong = self.getSongFromDB(indexes[1])
-        hardSong = self.getSongFromDB(indexes[2])
+            chosenIndex = random.randint(1, num_songs)
+            chosenSong = self.getSongFromDB(chosenIndex)
+            if chosenSong:
+                if chosenSong not in indexes:
+                    indexes.append(chosenSong)
+        easySong = indexes[0]
+        mediumSong = indexes[1]
+        hardSong = indexes[2]
 
         if easySong == False or mediumSong == False or hardSong == False:
             return False
