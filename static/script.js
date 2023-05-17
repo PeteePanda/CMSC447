@@ -331,6 +331,7 @@ function yesButton(){
     popupButton.classList.add("yes-button")
     popupButton.innerHTML = "Next Level";
     if(level == 1){
+        getLeaderboardData(level);
         popupHeader.innerHTML = "You have skipped today's Easy Level! ";
         popupText.textContent = displayLeaderboard(level);
         // Set the new level's variables
@@ -341,6 +342,7 @@ function yesButton(){
         brokeSong = brokeSong2;
     }
     else if(level == 2){
+        getLeaderboardData(level);
         popupHeader.innerHTML = "You have skipped today's Medium Level! \n";
         popupText.textContent = displayLeaderboard(level);
         // Set the new level's variables
@@ -351,6 +353,7 @@ function yesButton(){
         brokeSong = brokeSong3;
     }
     else if(level >= 3){
+        getLeaderboardData(level);
         popupHeader.innerHTML = "Game Over \n ";
         popupText.textContent = displayLeaderboard(level);
         popupButton.innerHTML = "Come back tommorow and try again!";

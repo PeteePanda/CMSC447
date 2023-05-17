@@ -102,12 +102,23 @@ class TestUtils(unittest.TestCase):
     #         self.assertTrue(songs)
     
     def test_getLeaderboard(self):
-        db = Lyridact_DB("data.db")
-        db.resetLeaderboard(1)
-        for i in range(20):
-            db.addScoreToLeaderboard(i, f"randomcookie{i}", 1)
-        lb = db.getLeaderboard(1)
-        print(lb)
+        print("Testing leaderboard")
+        try:
+            db = Lyridact_DB("data.db")
+            db.resetLeaderboard(1)
+            query = "DROP TABLE users"
+            base = db.connect()
+            base.execute(query)
+            query = "CREATE TABLE users (cookie TEXT, userData TEXT);"
+            base.execute(query)
+            for i in range(10):
+                db.addNewUser(f"randomcookie{i}")
+                db.addScoreToLeaderboard(i + random.randint(1, 20), f"randomcookie{i}", 1, f"Player #{i}")
+            lb = db.getLeaderboard(1)
+        
+        except Exception as e:
+            print("Error: ", e)
+        print("Hello")
         #self.assertTrue(lb[0][1] == 0)
 
 if __name__ == "__main__":

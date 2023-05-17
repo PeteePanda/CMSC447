@@ -559,16 +559,19 @@ class Lyridact_DB:
             if level == 1:
                 query = """CREATE TABLE easyLeaderboard (
                     cookie TEXT,
+                    user TEXT,
                     points INTEGER
                 );"""
             elif level == 2:
                 query = """CREATE TABLE mediumLeaderboard (
                     cookie TEXT,
+                    user TEXT,
                     points INTEGER
                 );"""
             elif level == 3:
                 query = """CREATE TABLE hardLeaderboard (
                     cookie TEXT,
+                    user TEXT,
                     points INTEGER
                 );"""
 
