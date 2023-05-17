@@ -444,9 +444,9 @@ class Lyridact_DB:
 
 
         # Hard Coding Songs for Demo
-        easySong = self.getSongFromDB(2-1)
-        mediumSong = self.getSongFromDB(26-1)
-        hardSong = self.getSongFromDB(30-1)
+        easySong = self.getSongFromDB(3-1)
+        mediumSong = self.getSongFromDB(28-1)
+        hardSong = self.getSongFromDB(41-1)
 
         if easySong == False or mediumSong == False or hardSong == False:
             return False
